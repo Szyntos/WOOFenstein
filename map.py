@@ -11,14 +11,18 @@ class GameObject(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.orientation = 0
+        self.type = None
 
 
 class Box(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
-        self.image = pygame.Surface((self.width, self.height))
+        self.type = "Box"
+        self.image = pygame.Surface((self.width * self.game_map.scale, self.height * self.game_map.scale))
         self.image.fill((123, 123, 123))
-        self.rect = self.image.get_rect(topleft=(x, y))
+        self.rect = self.image.get_rect(
+            topleft=(
+                x * self.game_map.scale + self.game_map.vector[0], y * self.game_map.scale + self.game_map.vector[1]))
 
     def update(self):
         pass
@@ -29,9 +33,11 @@ class Box(GameObject):
 class Glass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
-        self.image = pygame.Surface((self.width, self.height))
+        self.type = "Glass"
+        self.image = pygame.Surface((self.width * self.game_map.scale, self.height * self.game_map.scale))
         self.image.fill((123, 123, 255))
-        self.rect = self.image.get_rect(topleft=(x, y))
+        self.rect = self.image.get_rect(topleft=(
+            x * self.game_map.scale + self.game_map.vector[0], y * self.game_map.scale + self.game_map.vector[1]))
 
     def update(self):
         pass
@@ -40,12 +46,16 @@ class Glass(GameObject):
 
 
 class GameMap:
-    def __init__(self, screen, width, height):
+    def __init__(self, screen, width, height, vector, scale):
         self.screen = screen
         self.width = width
         self.height = height
-        self.bg = pygame.Surface((self.width, self.height))
-        self.bg.fill("black")
+        self.vector = vector
+        self.scale = scale
+        # self.bg = pygame.Surface((self.width * self.scale, self.height * self.scale))
+        self.bg = pygame.Surface((10000, 10000))
+
+        self.bg.fill((41, 39, 68))
         self.objects = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.keys = pygame.key.get_pressed()
@@ -63,6 +73,7 @@ class GameMap:
         self.player.sprite.update()
 
     def draw(self):
+        # self.screen.blit(self.bg, (self.vector[0], self.vector[1]))
         self.screen.blit(self.bg, (0, 0))
         self.objects.draw(self.screen)
         self.player.draw(self.screen)
@@ -71,34 +82,50 @@ class GameMap:
 class Player(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
-        filename = "pinkcar.png"
-        self.org = pygame.Surface((self.width, self.height))
+        filename = "P_2.png"
+        self.org = pygame.Surface((self.width * self.game_map.scale, self.height * self.game_map.scale))
         self.org.fill((255, 255, 255))
         self.org = pygame.image.load(filename).convert()
-        self.org = pygame.transform.scale(self.org, (self.width, self.height))
+        self.org = pygame.transform.scale(self.org,
+                                          (self.width * self.game_map.scale, self.height * self.game_map.scale))
         self.org.set_colorkey("BLACK")
 
-        self.image = pygame.Surface((self.width, self.height))
+        self.image = pygame.Surface((self.width * self.game_map.scale, self.height * self.game_map.scale))
         self.image.fill((255, 255, 255))
         self.image = pygame.image.load(filename).convert()
-        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        self.image = pygame.transform.scale(self.image,
+                                            (self.width * self.game_map.scale, self.height * self.game_map.scale))
 
         self.image.set_colorkey("BLACK")
 
-        self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 4
-        self.angular_speed = 4
-        self.vectors_org = [[0, -self.speed], [0, self.speed], [-self.speed, 0], [self.speed, 0]]
-        self.vectors = [[0, -self.speed], [0, self.speed], [-self.speed, 0], [self.speed, 0]]
+        self.rect = self.image.get_rect(topleft=(
+            x * self.game_map.scale + self.game_map.vector[0], y * self.game_map.scale + self.game_map.vector[1]))
+        self.x = x * self.game_map.scale + self.game_map.vector[0]
+        self.y = y * self.game_map.scale + self.game_map.vector[1]
+        self.speed_walk = 1
+        self.speed_sprint = 2 * self.speed_walk
+        self.speed_crouch = 0.5 * self.speed_walk
+        self.speed_walk *= self.game_map.scale
+        self.speed_sprint *= self.game_map.scale
+        self.speed = self.speed_walk
+        self.angular_speed = 1.5
+        self.vectors_org = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+        self.vectors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
 
     def move_vector(self, vec):
-        self.rect.x += vec[0]
-        self.x += vec[0]
-        self.rect.y += vec[1]
-        self.y += vec[1]
+        self.x += vec[0] * self.speed
+        self.y += vec[1] * self.speed
+        self.rect.x = self.x
+        self.rect.y = self.y
 
     def player_input(self):
+        # print(self.orientation)
         vector_moved = [0, 0]
+        self.speed = self.speed_walk
+        if self.game_map.keys[pygame.K_LSHIFT]:
+            self.speed = self.speed_sprint
+        if self.game_map.keys[pygame.K_LCTRL]:
+            self.speed = self.speed_crouch
         if self.game_map.keys[pygame.K_w]:
             self.move_vector(self.vectors[0])
             vector_moved[0] += self.vectors[0][0]
@@ -140,16 +167,30 @@ class Player(GameObject):
         if self.collision():
             self.orientation -= angle
             self.rotate(self.orientation)
+        self.orientation = self.orientation % 360
 
     def rotate_vectors(self, angle):
-        self.vectors = [[math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y,
-                         math.sin(-math.pi / 180 * angle) * x + math.cos(-math.pi / 180 * angle) * y] for x, y in
+        self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
+                         (math.sin(-math.pi / 180 * angle) * x + math.cos(-math.pi / 180 * angle) * y)] for x, y in
                         self.vectors_org]
 
     def rotate(self, angle):
         rotated_image = pygame.transform.rotate(self.org, angle)
         new_rect = rotated_image.get_rect(center=self.org.get_rect(center=self.rect.center).center)
+        self.x -= self.rect.x - new_rect.x
+        self.y -= self.rect.y - new_rect.y
         self.image, self.rect = rotated_image, new_rect
+
+    def rotate_mouse(self, mouse_move):
+        angle = 0
+        self.orientation -= mouse_move[0]/10
+        angle -= mouse_move[0]/10
+        self.rotate_vectors(self.orientation)
+        self.rotate(self.orientation)
+        if self.collision():
+            self.orientation -= angle
+            self.rotate(self.orientation)
+        self.orientation = self.orientation % 360
 
     def collision(self):
         return pygame.sprite.spritecollideany(self, self.game_map.objects)
