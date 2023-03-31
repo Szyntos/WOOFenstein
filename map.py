@@ -130,7 +130,7 @@ class Player(GameObject):
             vector_moved[0] += self.vectors[0][0]
             vector_moved[1] += self.vectors[0][1]
 
-        if self.game_map.keys[pygame.K_s]:
+        if self.game_map.keys[pygame.K_s] or pygame.mouse.get_pressed()[2]:
             vector_moved[0] += self.vectors[1][0]
             vector_moved[1] += self.vectors[1][1]
 

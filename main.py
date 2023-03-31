@@ -23,7 +23,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("WOOFenstien")
 clock = pygame.time.Clock()
 
-game_map = GameMap(screen, MAP_WIDTH, MAP_HEIGHT, [WIDTH_3D, 0], 1)
+game_map = GameMap(screen, MAP_WIDTH, MAP_HEIGHT, [WIDTH_3D, 0], 0.5)
 game_map.add_object(Box(screen, game_map, 100, 10, 100, 100))
 game_map.add_object(Box(screen, game_map, 10, 50, 300, 100))
 game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, 0))
