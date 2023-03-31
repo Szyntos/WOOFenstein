@@ -17,6 +17,13 @@ class Renderer:
                        range(-ray_count, ray_count + 1)]
         # print(self.angles)
         self.scales = [math.cos(a * math.pi / 180) for a in self.angles]
+        self.bg = pygame.Surface((self.width3d, self.game_map.height))
+        self.bg.fill((0, 0, 0))
+        self.cell = pygame.Surface((self.width3d, self.game_map.height/2))
+
+        self.floor = pygame.Surface((self.width3d, self.game_map.height/2))
+        self.cell.fill("#7E7463")
+        self.floor.fill("#525252")
         # self.scales = [1 for a in self.angles]
 
     def draw_rays(self, x0, y0, orient):
@@ -92,28 +99,31 @@ class Renderer:
                 lines.append([collisions[t][1], collisions[t + 1][1]])
                 self.rays[i].append(distance(collisions[0][1], collisions[t + 1][1]))
                 # break
-            for line in lines:
-                # pygame.draw.line(self.game_map.screen, pygame.Color(255 - 50 * tint, 255 - 50 * tint, 255, 255),
-                #                  line[0], line[1])
-                tint += 1
+            # for line in lines:
+            #     pygame.draw.line(self.game_map.screen, pygame.Color(255 - 50 * tint, 255 - 50 * tint, 255, 255),
+            #                      line[0], line[1])
+            #     tint += 1
             i += 1
 
     def render(self):
+        self.game_map.screen.blit(self.cell, (0, 0))
+        self.game_map.screen.blit(self.floor, (0, self.game_map.height/2))
         # print(self.rays)
-        const = self.game_map.height*35
-        self.rays = [[self.rays[i][j] * self.scales[i] for j in range(len(self.rays[i]))] for i in range(len(self.scales))]
+        const = self.game_map.height*50
+        self.rays = [[self.rays[i][j] * self.scales[i] for j in range(len(self.rays[i]))]
+                     for i in range(len(self.scales))]
         dw = self.width3d / len(self.rays)
         for i in range(len(self.rays)):
             for j in range(len(self.rays[i])):
-                c = "grey"
+                c = "#A8A8A8"
                 if len(self.rays[i]) > 1:
-                    c= "lightblue"
+                    c= "#88E3F7"
                 if j > 0:
-                    c = "blue"
+                    c = "#9AC3CC"
                 # print(self.width3d - (i+1)*dw)
                 pygame.draw.rect(self.game_map.screen, pygame.Color(c),
                                  pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 -
-                                             (const / (self.rays[i][j])) / 2, dw + 1,
+                                             (const / (self.rays[i][j])) / 2, dw+1,
                                              const / self.rays[i][j]))
 
 
@@ -161,7 +171,7 @@ def line_intersection(l1, l2):
         d = l2[1][1] - c * l2[1][0]
         if is_between(l1[0][0], l2[0][0], l2[1][0]) and is_between(c * l1[0][0] + d, l2[0][1],
                                                                    l2[1][1]) and same_direction(l1, [l1[0][0],
-                                                                                                     c * l1[0][0] + d]):
+                                                                                            c * l1[0][0] + d]):
             return [l1[0][0], c * l1[0][0] + d]
         return [10000000, 10000000]
 
@@ -170,7 +180,7 @@ def line_intersection(l1, l2):
         b = l1[1][1] - a * l1[1][0]
         if is_between(l2[0][0], l2[0][0], l2[1][0]) and is_between(a * l2[0][0] + b, l2[0][1],
                                                                    l2[1][1]) and same_direction(l1, [l2[0][0],
-                                                                                                     a * l2[0][0] + b]):
+                                                                                            a * l2[0][0] + b]):
             return [l2[0][0], a * l2[0][0] + b]
         return [10000000, 10000000]
 

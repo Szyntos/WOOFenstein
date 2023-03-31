@@ -52,8 +52,8 @@ class GameMap:
         self.height = height
         self.vector = vector
         self.scale = scale
-        # self.bg = pygame.Surface((self.width * self.scale, self.height * self.scale))
-        self.bg = pygame.Surface((10000, 10000))
+        self.bg = pygame.Surface((self.width * self.scale, self.height * self.scale))
+        # self.bg = pygame.Surface((10000, 10000))
 
         self.bg.fill((41, 39, 68))
         self.objects = pygame.sprite.Group()
@@ -73,8 +73,8 @@ class GameMap:
         self.player.sprite.update()
 
     def draw(self):
-        # self.screen.blit(self.bg, (self.vector[0], self.vector[1]))
-        self.screen.blit(self.bg, (0, 0))
+        self.screen.blit(self.bg, (self.vector[0], self.vector[1]))
+        # self.screen.blit(self.bg, (0, 0))
         self.objects.draw(self.screen)
         self.player.draw(self.screen)
 
@@ -102,7 +102,7 @@ class Player(GameObject):
             x * self.game_map.scale + self.game_map.vector[0], y * self.game_map.scale + self.game_map.vector[1]))
         self.x = x * self.game_map.scale + self.game_map.vector[0]
         self.y = y * self.game_map.scale + self.game_map.vector[1]
-        self.speed_walk = 1
+        self.speed_walk = 2.5
         self.speed_sprint = 2 * self.speed_walk
         self.speed_crouch = 0.5 * self.speed_walk
         self.speed_walk *= self.game_map.scale
@@ -126,32 +126,39 @@ class Player(GameObject):
             self.speed = self.speed_sprint
         if self.game_map.keys[pygame.K_LCTRL]:
             self.speed = self.speed_crouch
-        if self.game_map.keys[pygame.K_w]:
-            self.move_vector(self.vectors[0])
+        if self.game_map.keys[pygame.K_w] or pygame.mouse.get_pressed()[0]:
             vector_moved[0] += self.vectors[0][0]
             vector_moved[1] += self.vectors[0][1]
 
         if self.game_map.keys[pygame.K_s]:
-            self.move_vector(self.vectors[1])
             vector_moved[0] += self.vectors[1][0]
             vector_moved[1] += self.vectors[1][1]
 
-        if self.collision():
-            self.move_vector([-x for x in vector_moved])
-
-        vector_moved = [0, 0]
         if self.game_map.keys[pygame.K_a]:
-            self.move_vector(self.vectors[2])
             vector_moved[0] += self.vectors[2][0]
             vector_moved[1] += self.vectors[2][1]
 
         if self.game_map.keys[pygame.K_d]:
-            self.move_vector(self.vectors[3])
+
             vector_moved[0] += self.vectors[3][0]
             vector_moved[1] += self.vectors[3][1]
-
+        s = math.sqrt(vector_moved[0]**2 + vector_moved[1]**2)
+        if s > 1:
+            vector_moved[0] *= 1/s
+            vector_moved[1] *= 1/s
+        self.move_vector([vector_moved[0], 0])
         if self.collision():
-            self.move_vector([-x for x in vector_moved])
+            self.move_vector([-vector_moved[0], 0])
+        self.move_vector([0, vector_moved[1]])
+        if self.collision():
+            self.move_vector([0, -vector_moved[1]])
+        # self.move_vector(vector_moved)
+        # if self.collision():
+        #     self.move_vector([-vector_moved[0], 0])
+        #     if self.collision():
+        #         self.move_vector([+vector_moved[0], -vector_moved[1]])
+        #         if self.collision():
+        #             self.move_vector([-vector_moved[0], 0])
 
         angle = 0
         if self.game_map.keys[pygame.K_RIGHT]:
@@ -168,7 +175,6 @@ class Player(GameObject):
             self.orientation -= angle
             self.rotate(self.orientation)
         self.orientation = self.orientation % 360
-
     def rotate_vectors(self, angle):
         self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
                          (math.sin(-math.pi / 180 * angle) * x + math.cos(-math.pi / 180 * angle) * y)] for x, y in
@@ -176,10 +182,11 @@ class Player(GameObject):
 
     def rotate(self, angle):
         rotated_image = pygame.transform.rotate(self.org, angle)
-        new_rect = rotated_image.get_rect(center=self.org.get_rect(center=self.rect.center).center)
-        self.x -= self.rect.x - new_rect.x
-        self.y -= self.rect.y - new_rect.y
-        self.image, self.rect = rotated_image, new_rect
+        # new_rect = rotated_image.get_rect(center=self.org.get_rect(center=self.rect.center).center)
+        # self.x -= self.rect.x - new_rect.x
+        # self.y -= self.rect.y - new_rect.y
+        # self.rect = new_rect
+        self.image = rotated_image
 
     def rotate_mouse(self, mouse_move):
         angle = 0

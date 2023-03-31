@@ -5,9 +5,9 @@ import time
 pygame.init()
 
 
-scale = 0.75
-MAP_WIDTH = 700
-MAP_HEIGHT = 700
+scale = 0.6
+MAP_WIDTH = 800
+MAP_HEIGHT = 800
 
 WIDTH_3D = 1.5*MAP_WIDTH
 WIDTH = MAP_WIDTH + WIDTH_3D
@@ -28,16 +28,18 @@ game_map.add_object(Box(screen, game_map, 100, 10, 100, 100))
 game_map.add_object(Box(screen, game_map, 10, 50, 300, 100))
 game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, 0))
 game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, MAP_HEIGHT-10))
-game_map.add_object(Box(screen, game_map, 10, MAP_HEIGHT-20, 0, 10))
+# game_map.add_object(Box(screen, game_map, 10, MAP_HEIGHT-20, 0, 10))
 game_map.add_object(Box(screen, game_map, 10, MAP_HEIGHT-20, MAP_HEIGHT-10, 10))
 game_map.add_object(Box(screen, game_map, 100, 10, 100, 100))
 game_map.add_object(Box(screen, game_map, 10, 10, 300, 300))
 game_map.add_object(Glass(screen, game_map, 10, 100, 200, 100))
 game_map.add_object(Glass(screen, game_map, 100, 100, 50, 350))
+game_map.add_object(Glass(screen, game_map, 100, 10, 350, 350))
+game_map.add_object(Box(screen, game_map, 10, 50, 400, 390))
 # game_map.add_object(Glass(screen, game_map, 10, 100, 150, 120))
-game_map.add_player(Player(screen, game_map, 10, 20, MAP_WIDTH//2, MAP_HEIGHT//2))
+game_map.add_player(Player(screen, game_map, 7, 10, MAP_WIDTH//2, MAP_HEIGHT//2))
 
-renderer = Renderer(game_map, WIDTH_3D, 90, 80)
+renderer = Renderer(game_map, WIDTH_3D, 90, 70)
 pygame.event.set_grab(True)
 pygame.mouse.set_visible(False)
 while True:
