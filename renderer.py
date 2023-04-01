@@ -7,6 +7,7 @@ import map
 
 class Renderer:
     def __init__(self, game_map, width3d, fov, ray_count):
+        # self.colors = {obj_examples[i].type: obj_examples[i].color for i in range(len(obj_examples))}
         self.width3d = width3d
         self.game_map = game_map
         self.fov = fov
@@ -43,7 +44,8 @@ class Renderer:
             object_corners.append(
                 [[obj.x, obj.y], [obj.x + obj.width, obj.y],
                  [obj.x + obj.width, obj.y + obj.height],
-                 [obj.x, obj.y + obj.height], obj.type])
+                 [obj.x, obj.y + obj.height], obj,
+                 [[obj.width, 0], [0, obj.height], [-obj.width, 0], [0, -obj.height]]])
 
         to_check = [[] for _ in range(len(objects))]
         up = not (0 <= orient <= 90 - self.fov / 2 or 270 + self.fov / 2 <= orient <= 360)
@@ -56,11 +58,11 @@ class Renderer:
             if not ((not up) and obj.y > y0 or (not down) and obj.y + obj.height < y0 or
                     (not right) and obj.x + obj.width < x0 or (not left) and obj.x > x0):
                 if obj_center[0] - x0 > 0 and left:
-                    to_check[i].append([0, 3])
+                    to_check[i].append([3, 0])
                 elif right:
                     to_check[i].append([1, 2])
                 if obj_center[1] - y0 < 0 and down:
-                    to_check[i].append([3, 2])
+                    to_check[i].append([2, 3])
                 elif up:
                     to_check[i].append([0, 1])
             i += 1
@@ -74,29 +76,30 @@ class Renderer:
         self.ray_collisions = [[] for _ in circle]
         for point in circle:
             ray = [[x0, y0], point]
+            ray_vec = [ray[1][0] - ray[0][0], ray[1][1] - ray[0][1]]
             collisions = []
             j = 0
             for obj_corner_pairs in to_check:
                 intersections = []
                 for pair in obj_corner_pairs:
                     edge = [object_corners[j][pair[0]], object_corners[j][pair[1]]]
-                    pygame.draw.line(self.game_map.screen, pygame.Color(222, 0, 0, 255),
-                                     [edge[0][0] * self.game_map.scale + self.game_map.vector[0],
-                                      edge[0][1] * self.game_map.scale + self.game_map.vector[1]],
-                                     [edge[1][0] * self.game_map.scale + self.game_map.vector[0],
-                                      edge[1][1] * self.game_map.scale + self.game_map.vector[1]],  3)
-                    intersection = line_intersection_2(ray, edge)
-                    intersections.append([intersection, object_corners[j][4], angle_between_lines(ray, edge)])
-
+                    #     # pygame.draw.line(self.game_map.screen, pygame.Color(222, 0, 0, 255),
+                    #     #                  [edge[0][0] * self.game_map.scale + self.game_map.vector[0],
+                    #     #                   edge[0][1] * self.game_map.scale + self.game_map.vector[1]],
+                    #     #                  [edge[1][0] * self.game_map.scale + self.game_map.vector[0],
+                    #     #                   edge[1][1] * self.game_map.scale + self.game_map.vector[1]], 3)
+                    intersection = line_intersection(ray, edge)
+                    intersections.append([intersection, object_corners[j][4], angle_between_lines(ray_vec, pair[0])])
+                #
                 if intersections:
                     collisions.append(min(intersections, key=lambda x: distance_no_sqrt([x0, y0], x[0])))
                 # collisions += intersections
                 j += 1
-
+            #
             collisions.sort(key=lambda x: distance_no_sqrt([x0, y0], x[0]))
             collisions_proper = []
             j = 0
-            while j < len(collisions) and collisions[j][1] == "Glass":
+            while j < len(collisions) and collisions[j][1].type == "Glass":
                 collisions_proper.append(collisions[j])
                 j += 1
             if j < len(collisions):
@@ -108,26 +111,24 @@ class Renderer:
         i = 0
         for i in range(len(self.ray_collisions)):
             collisions_proper = self.ray_collisions[i]
-            if i == int(len(self.ray_collisions) / 2) or i == 0 or i == len(self.ray_collisions)-1:
+            if i == int(len(self.ray_collisions) / 2) or i == 0 or i == len(self.ray_collisions) - 1:
                 lines = []
-                for_lines = [[[self.x0, self.y0]]] + collisions_proper
+                for_lines = [[[self.x0, self.y0], map.GameObject(0, self.game_map, 0, 0, 0, 0)]] + collisions_proper
                 for j in range(len(for_lines) - 1):
                     lines.append([[for_lines[j][0][0] * self.game_map.scale + self.game_map.vector[0],
                                    for_lines[j][0][1] * self.game_map.scale + self.game_map.vector[1]],
                                   [for_lines[j + 1][0][0] * self.game_map.scale + self.game_map.vector[0],
-                                   for_lines[j + 1][0][1] * self.game_map.scale + self.game_map.vector[1]]])
-                c_box = hex_to_rgb("#A8A8A8") + [122]
-                c_glass = hex_to_rgb("#247F93") + [255]
-                c = (255, 255, 255, 120)
+                                   for_lines[j + 1][0][1] * self.game_map.scale + self.game_map.vector[1]],
+                                  for_lines[j + 1][1]])
+                # c_box = hex_to_rgb("#A8A8A8") + [122]
+                # c_glass = hex_to_rgb("#247F93") + [100]
+                # c_glass = (0, 0, 255, 50)
+                # c = (255, 255, 255, 120)
                 c = (255, 0, 0, 120)
                 j = 0
                 for line in lines:
                     if j > 0:
-                        if line[0][1] == "Box":
-
-                            c = combine_colors(c, c_box)
-                        else:
-                            c = combine_colors(c_glass, c)
+                        c = combine_colors(lines[j - 1][2].color, c)
 
                     pygame.draw.line(self.game_map.screen, pygame.Color(c),
                                      line[0], line[1])
@@ -151,33 +152,28 @@ class Renderer:
         # self.rays = [[self.rays[i][j] * self.scales[i] for j in range(len(self.rays[i]))]
         #              for i in range(len(self.scales))]
         dw = self.width3d / len(distances_normalised)
-        c_box = hex_to_rgb("#A8A8A8") + [122]
-        c_glass = hex_to_rgb("#2A97B0") + [122]
-        c = c_box
+        # c_box = hex_to_rgb("#A8A8A8") + [122]
+        # c_glass = hex_to_rgb("#2A97B0") + [122]
+        c = (0, 0, 0, 255)
         for i in range(len(distances_normalised)):
             for j in range(len(distances_normalised[i])):
-                obj_type = distances_normalised[i][j][1]
                 if j == 0:
-                    if obj_type == "Box":
-                        c = c_box
-                    else:
-                        c = c_glass
+                    c = distances_normalised[i][j][1].color
                 elif j > 0:
-                    if obj_type == "Box":
-
-                        c = combine_colors(c, c_box)
-                    else:
-                        c = combine_colors(c, c_glass)
+                    c = combine_colors(c, distances_normalised[i][j][1].color)
                 b = 12 / (j + 4) * max(0, min(255, abs(distances_normalised[i][j][2]) / 360 * 255))
                 c = combine_colors([220 - b, 220 - b, 220 - b, 60], c)
-                #         # print(self.width3d - (i+1)*dw)
+                # pygame.draw.rect(self.game_map.screen, pygame.Color(c),
+                #                  pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 -
+                #                              (const / (distances_normalised[i][j][0])) / 2, dw + 1,
+                #                              const / (distances_normalised[i][j][0]) / 2))
+                # pygame.draw.rect(self.game_map.screen, pygame.Color(c),
+                #                  pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 - 1, dw + 1,
+                #                              const / distances_normalised[i][j][0] / 2))
                 pygame.draw.rect(self.game_map.screen, pygame.Color(c),
                                  pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 -
                                              (const / (distances_normalised[i][j][0])) / 2, dw + 1,
-                                             const / (distances_normalised[i][j][0]) / 2))
-                pygame.draw.rect(self.game_map.screen, pygame.Color(c),
-                                 pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 - 1, dw + 1,
-                                             const / distances_normalised[i][j][0] / 2))
+                                             const / (distances_normalised[i][j][0])))
 
 
 def distance(p1, p2):
@@ -187,7 +183,8 @@ def distance(p1, p2):
 
 def distance_no_sqrt(p1, p2):
     # return distance_2(p1, p2)
-    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+    return (p1[0] - p2[0])**2 + (p1[1] - p2[1])**2
+    # return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
 
 def distance_2(p1, p2):
@@ -203,12 +200,27 @@ def distance_2(p1, p2):
     return (dx + dy - (dy >> 1)) * m
 
 
-def angle_between_lines(l1, l2):
-    v1 = [l1[1][0] - l1[0][0], l1[1][1] - l1[0][1]]
-    v2 = [l2[1][0] - l2[0][0], l2[1][1] - l2[0][1]]
+def angle_between_lines(v1, edge_index):
+    # v1 = [l1[1][0] - l1[0][0], l1[1][1] - l1[0][1]]
+    # v2 = [l2[1][0] - l2[0][0], l2[1][1] - l2[0][1]]
     # a = (math.acos(((v1[0] * v2[0] + v1[1] * v2[1]) /
     #                 (math.sqrt((v1[0] ** 2 + v1[1] ** 2) * (v2[0] ** 2 + v2[1] ** 2))))) * 180 / math.pi - 90)
-    a = ((DiamondAngle(v1[1], v1[0]) - DiamondAngle(v2[1], v2[0]) - 2) / 4 * 360) % 180 - 90
+    # a = ((DiamondAngle(v1[1], v1[0]) - DiamondAngle(v2[1], v2[0]) - 2) / 4 * 360) % 180 - 90
+    # if l2 == 0:
+    #     # right
+    #     a = ((DiamondAngle(v1[1], v1[0]) - 0 - 2) / 4 * 360) % 180 - 90
+    # elif l2 == 1:
+    #     # left
+    #     a = ((DiamondAngle(v1[1], v1[0]) - 1 - 2) / 4 * 360) % 180 - 90
+    # elif l2 == 2:
+    #     # up
+    #     a = ((DiamondAngle(v1[1], v1[0]) + 0 - 2) / 4 * 360) % 180 - 90
+    # elif l2 == 3:
+    #     # right
+    #     a = ((DiamondAngle(v1[1], v1[0]) + 1 + 2) / 4 * 360) % 180 - 90
+    # else:
+    #     a = 180
+    a = ((DiamondAngle(v1[1], v1[0]) + abs(edge_index-1)-1) * 90) % 180 - 90
     # print(a)
     return a
 
@@ -240,7 +252,7 @@ def approx_equals(a, b):
     return 0
 
 
-def line_intersection(ray, edge):
+def line_intersection_1(ray, edge):
     numerator_a = (ray[1][1] - ray[0][1])
     numerator_c = (edge[1][1] - edge[0][1])
     denominator_a = (ray[1][0] - ray[0][0])
@@ -297,9 +309,9 @@ def combine_colors(c0, c1):
     r01 = ((1 - a0) * a1 * r1 + a0 * r0) / a01
     g01 = ((1 - a0) * a1 * g1 + a0 * g0) / a01
     b01 = ((1 - a0) * a1 * b1 + a0 * b0) / a01
-    r01 = max(0, r01 - 10)
-    g01 = max(0, g01 - 10)
-    b01 = max(0, b01 - 10)
+    r01 = max(0, r01 - 15)
+    g01 = max(0, g01 - 15)
+    b01 = max(0, b01 - 15)
     return [r01, g01, b01, a01 * 255]
 
 
@@ -309,15 +321,15 @@ def hex_to_rgb(h):
 
 
 def DiamondAngle(y, x):
-    # if y >= 0:
-    #     return y / (x + y) if x >= 0 else 1 - x / (-x + y)
-    # else:
-    #     return 2 - y / (-x - y) if x < 0 else 3 + x / (x - y)
-    return y / (x + y) if y >= 0 and x >= 0 else 1 + x / (x - y) if y >= 0 and x < 0 else 2 + y / (
-            x + y) if y < 0 and x < 0 else 3 + x / (x - y)
+    if y >= 0:
+        return y / (x + y) if x >= 0 else 1 - x / (-x + y)
+    else:
+        return 2 - y / (-x - y) if x < 0 else 3 + x / (x - y)
+    # return y / (x + y) if y >= 0 and x >= 0 else 1 + x / (x - y) if y >= 0 and x < 0 else 2 + y / (
+    #         x + y) if y < 0 and x < 0 else 3 + x / (x - y)
 
 
-def line_intersection_2(ray, edge):
+def line_intersection(ray, edge):
     A = [ray[1][0] - ray[0][0], ray[1][1] - ray[0][1]]
     B = [edge[0][0] - edge[1][0], edge[0][1] - edge[1][1]]
     C = [ray[0][0] - edge[0][0], ray[0][1] - edge[0][1]]
@@ -337,5 +349,4 @@ def line_intersection_2(ray, edge):
     elif numerator_b > 0 or numerator_b < denominator:
         return ray[1]
     a = numerator_a / denominator
-    b = numerator_b / denominator
     return [ray[0][0] + a * A[0], ray[0][1] + a * A[1]]

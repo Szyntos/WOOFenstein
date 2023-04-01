@@ -1,5 +1,7 @@
 import pygame
 import math
+import renderer
+
 
 class GameMap():
     def __init__(self, screen, width, height, vector, scale):
@@ -35,6 +37,7 @@ class GameMap():
         # self.player.draw(self.screen)
         self.player.sprite.draw()
 
+
 class GameObject(pygame.sprite.Sprite):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__()
@@ -69,12 +72,29 @@ class Box(GameObject):
         # self.x += 1
 
 
+class RedBox(GameObject):
+    def __init__(self, screen, game_map, width, height, x, y):
+        super().__init__(screen, game_map, width, height, x, y)
+        self.type = "Box"
+        self.image = pygame.Surface((self.width_scaled, self.height_scaled))
+        self.color = [120, 70, 70, 255]
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect(
+            topleft=(self.x_scaled, self.y_scaled))
+
+    def update(self):
+        pass
+        # self.rect.x += 1
+        # self.x += 1
+
+
 class Glass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
         self.type = "Glass"
         self.image = pygame.Surface((self.width_scaled, self.height_scaled))
-        self.color = [136.0, 227.0, 247.0, 122]
+        self.color = renderer.hex_to_rgb("#1c319f") + [122]
+        # self.color = [136.0, 227.0, 247.0, 122]
         self.image.fill(self.color)
         self.rect = self.image.get_rect(
             topleft=(self.x_scaled, self.y_scaled))
@@ -199,11 +219,10 @@ class Player(GameObject):
         # self.x -= self.rect.x - new_rect.x
         # self.y -= self.rect.y - new_rect.y
         # self.rect = new_rect
-        new_rect.center = (self.x_scaled+self.width_scaled/2, self.y_scaled+self.height_scaled/2)
+        new_rect.center = (self.x_scaled + self.width_scaled / 2, self.y_scaled + self.height_scaled / 2)
         self.image_rect = new_rect
 
         self.image = rotated_image
-
 
     def rotate_mouse(self, mouse_move):
         angle = 0
@@ -221,5 +240,6 @@ class Player(GameObject):
 
     def update(self):
         self.player_input()
+
     def draw(self):
         self.game_map.screen.blit(self.image, self.image_rect)
