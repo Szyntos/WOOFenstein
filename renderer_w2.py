@@ -17,17 +17,17 @@ class Renderer:
                        range(-ray_count, ray_count + 1)]
         # print(self.angles)
         self.scales = [math.cos(a * math.pi / 180) for a in self.angles]
-
         self.bg = pygame.Surface((self.width3d, self.game_map.height))
         self.bg.fill((0, 0, 0))
         self.cell = pygame.Surface((self.width3d, self.game_map.height/2))
+
         self.floor = pygame.Surface((self.width3d, self.game_map.height/2))
         self.cell.fill("#7E7463")
         self.floor.fill("#525252")
         # self.scales = [1 for a in self.angles]
 
     def draw_rays(self, x0, y0, orient):
-        r = 1000
+        r = 10000
         circle = [[r * math.sin((orient + self.angles[abs(i)] * ((i >= 0) - (i < 0)) + 180) * math.pi / 180) + x0,
                    r * math.cos((orient + self.angles[abs(i)] * ((i >= 0) - (i < 0)) + 180) * math.pi / 180) + y0]
                   for i in range(len(self.angles))]
@@ -46,18 +46,22 @@ class Renderer:
         # up = 270 > orient > 90 or (orient - self.fov / 2) % 360 == 270 or \
         #      270 > (orient - self.fov / 2) % 360 > 90 \
         #      or (orient + self.fov / 2) % 360 == 90 or 270 > (orient + self.fov / 2) % 360 > 90
+        up = not (0 <= orient <= 90-self.fov/2 or 270 + self.fov/2 <= orient <= 359)
+        down = not (90 + self.fov / 2 <= orient <= 270 - self.fov/2)
+        right = not (180 + self.fov / 2 <= orient <= 360 - self.fov / 2)
+        left = not (0 + self.fov / 2 <= orient <= 180 - self.fov / 2)
         for obj in self.game_map.objects.sprites():
             obj_center = (obj.rect.x + obj.width / 2, obj.rect.y + obj.height / 2)
             # print((orient - self.fov / 2) % 360, orient)
             #
             # print(right, up)
-            if obj_center[0] - x0 > 0:
+            if obj_center[0] - x0 > 0 and left:
                 to_check[i].append([0, 3])
-            else:
+            elif right:
                 to_check[i].append([1, 2])
-            if obj_center[1] - y0 < 0:
+            if obj_center[1] - y0 < 0 and down:
                 to_check[i].append([3, 2])
-            else:
+            elif up:
                 to_check[i].append([0, 1])
             i += 1
         i = 0
@@ -71,6 +75,8 @@ class Renderer:
                 intersections = []
                 for pair in obj_corner_pairs:
                     line = [object_corners[j][pair[0]], object_corners[j][pair[1]]]
+                    # pygame.draw.line(self.game_map.screen, pygame.Color(222, 0, 0, 255),
+                    #                  line[0], line[1])
                     intersection = line_intersection(ray, line)
                     if intersection == [10000, 1000]:
                         continue
@@ -99,9 +105,9 @@ class Renderer:
                 lines.append([collisions[0][1], collisions[t + 1][1]])
                 self.rays[i].append(distance(collisions[0][1], collisions[t + 1][1]))
                 # break
-            for line in lines:
-                pygame.draw.line(self.game_map.screen, pygame.Color(255 - 50 * tint, 255 - 50 * tint, 255, 255),
-                                 line[0], line[1])
+            # for line in lines:
+                # pygame.draw.line(self.game_map.screen, pygame.Color(255 - 50 * tint, 255 - 50 * tint, 255, 255),
+                #                  line[0], line[1])
             #     tint += 1
             i += 1
 

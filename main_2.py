@@ -1,29 +1,33 @@
-from map import *
+from map_2 import *
 from sys import exit
-from renderer import *
+from renderer_2 import *
 import time
+
 pygame.init()
 
 
-scale = 0.6
+scale = 0.75
+
 MAP_WIDTH = 800
 MAP_HEIGHT = 800
 
-WIDTH_3D = 1.5*MAP_WIDTH
-WIDTH = MAP_WIDTH + WIDTH_3D
-HEIGHT = MAP_HEIGHT
+RENDER_WIDTH = 1.5 * MAP_WIDTH
+RENDER_HEIGHT = MAP_HEIGHT
 
-WIDTH_3D *= scale
+WINDOW_WIDTH = RENDER_WIDTH
+WINDOW_HEIGHT = max(RENDER_HEIGHT, MAP_HEIGHT)
+
 MAP_WIDTH *= scale
 MAP_HEIGHT *= scale
-WIDTH *= scale
-HEIGHT *= scale
+RENDER_WIDTH *= scale
+RENDER_HEIGHT *= scale
+WINDOW_WIDTH *= scale
+WINDOW_HEIGHT *= scale
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("WOOFenstien")
 clock = pygame.time.Clock()
-
-game_map = GameMap(screen, MAP_WIDTH, MAP_HEIGHT, [WIDTH_3D, 0], 1)
+game_map = GameMap(screen, MAP_WIDTH, MAP_HEIGHT, [RENDER_WIDTH, 0], 1)
 game_map.add_object(Box(screen, game_map, 100, 10, 100, 100))
 game_map.add_object(Box(screen, game_map, 10, 50, 300, 100))
 game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, 0))
@@ -37,9 +41,10 @@ game_map.add_object(Glass(screen, game_map, 100, 100, 50, 350))
 game_map.add_object(Glass(screen, game_map, 100, 10, 350, 350))
 game_map.add_object(Box(screen, game_map, 10, 50, 400, 390))
 # game_map.add_object(Glass(screen, game_map, 10, 100, 150, 120))
-game_map.add_player(Player(screen, game_map, 7, 10, MAP_WIDTH//2, MAP_HEIGHT//2))
+game_map.add_player(Player(screen, game_map, 10, 10, MAP_WIDTH//2-20, MAP_HEIGHT//2))
 
-renderer = Renderer(game_map, WIDTH_3D, 90, 150)
+renderer = Renderer(game_map, RENDER_WIDTH, 90, 100)
+
 pygame.event.set_grab(True)
 pygame.mouse.set_visible(False)
 while True:
@@ -47,7 +52,6 @@ while True:
     mouse_move = (0, 0)
 
     for event in pygame.event.get():
-
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
@@ -57,7 +61,6 @@ while True:
                 exit()
         if event.type == pygame.MOUSEMOTION:
             mouse_move = event.rel
-
     game_map.player.sprite.rotate_mouse(mouse_move)
     game_map.draw()
     game_map.update()
