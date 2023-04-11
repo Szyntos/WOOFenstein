@@ -8,7 +8,7 @@ scale = 0.75
 
 MAP_WIDTH = 900
 MAP_HEIGHT = 900
-RAY_COUNT = 90  # Actual number of rays is 2*RAY_COUNT-1
+RAY_COUNT = 70  # Actual number of rays is 2*RAY_COUNT-1
 FOV = 90
 
 RENDER_WIDTH = 2 * MAP_WIDTH
@@ -35,6 +35,7 @@ pygame.mouse.set_visible(False)
 map_scale = 0.4
 game_map = GameMap(screen, MAP_WIDTH, MAP_HEIGHT, [RENDER_WIDTH - MAP_WIDTH * map_scale, 0], map_scale)
 renderer = Renderer(game_map, RENDER_WIDTH, FOV, RAY_COUNT)
+game_map.renderer = renderer
 
 # Adding objects to the map
 game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, 0))
@@ -55,6 +56,20 @@ game_map.add_object(RedGlass(screen, game_map, 10, 100, 150, 120))
 game_map.add_object(Glass(screen, game_map, 5, 100, 550, 100))
 game_map.add_object(GreenGlass(screen, game_map, 5, 100, 540, 100))
 game_map.add_object(RedGlass(screen, game_map, 5, 100, 530, 100))
+
+# Adding enemy to the map
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
+game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
 
 # Adding player to the map
 game_map.add_player(Player(screen, game_map, 5, 5, MAP_WIDTH // 2 - 20, MAP_HEIGHT // 2 + 200))
@@ -90,7 +105,7 @@ while True:
     renderer.render()
     game_map.draw()
     game_map.update()
-    renderer.draw_rays()
+    # renderer.draw_rays()
     # renderer.draw_visible_edges(game_map.player.sprite.x + game_map.player.sprite.width / 2,
     #                             game_map.player.sprite.y + game_map.player.sprite.height / 2,
     #                             game_map.player.sprite.orientation)

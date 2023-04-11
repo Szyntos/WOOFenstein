@@ -1,5 +1,9 @@
+import time
+
 import pygame
 import math
+import random
+from perlin_noise import PerlinNoise
 from utils import *
 
 
@@ -13,11 +17,28 @@ class GameMap:
         self.bg = pygame.Surface((self.width * self.scale, self.height * self.scale))
         self.bg.fill((41, 39, 68))
         self.objects = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+        self.projectiles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.keys = pygame.key.get_pressed()
+        self.renderer = None
 
     def add_object(self, obj):
         self.objects.add(obj)
+
+    def add_enemy(self, obj):
+        self.enemies.add(obj)
+
+    def remove_enemy(self, obj):
+        self.enemies.remove(obj)
+        del obj
+
+    def add_projectile(self, obj):
+        self.projectiles.add(obj)
+
+    def remove_projectile(self, obj):
+        self.projectiles.remove(obj)
+        del obj
 
     def add_player(self, pla):
         self.player = pygame.sprite.GroupSingle(pla)
@@ -26,11 +47,17 @@ class GameMap:
         self.keys = pygame.key.get_pressed()
         for obj in self.objects.sprites():
             obj.update()
+        for enemy in self.enemies.sprites():
+            enemy.update()
+        for projectile in self.projectiles.sprites():
+            projectile.update()
         self.player.sprite.update()
 
     def draw(self):
         self.screen.blit(self.bg, (self.vector[0], self.vector[1]))
         self.objects.draw(self.screen)
+        self.enemies.draw(self.screen)
+        self.projectiles.draw(self.screen)
         self.player.sprite.draw()
 
 
@@ -84,7 +111,7 @@ class RedBox(GameObject):
 class Glass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
-        self.type = "semitransparent"
+        self.type = "opaque"
         self.image = pygame.Surface((self.width_scaled, self.height_scaled))
         self.color = hex_to_rgb("#1c319f") + [122]
         # self.color = [136.0, 227.0, 247.0, 122]
@@ -114,7 +141,7 @@ class RedGlass(GameObject):
 class GreenGlass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
-        self.type = "semitransparent"
+        self.type = "opaque"
         self.image = pygame.Surface((self.width_scaled, self.height_scaled))
         self.color = hex_to_rgb("#1caa9f") + [50]
         # self.color = [136.0, 227.0, 247.0, 122]
@@ -123,6 +150,115 @@ class GreenGlass(GameObject):
             topleft=(self.x_scaled, self.y_scaled))
 
     def update(self):
+        pass
+
+
+class Projectile(GameObject):
+    def __init__(self, screen, game_map, width, height, x, y, orientation):
+        super().__init__(screen, game_map, width, height, x, y)
+        self.type = "semitransparent"
+        self.image = pygame.Surface((self.width_scaled, self.height_scaled))
+        self.color = hex_to_rgb("#aa4422") + [120]
+        # self.color = [136.0, 227.0, 247.0, 122]
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect(
+            topleft=(self.x_scaled, self.y_scaled))
+        self.orientation = orientation
+        self.speed = 10
+        self.speed_scaled = self.speed * self.game_map.scale
+        self.vectors_org = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+        self.vectors = [[(math.cos(-math.pi / 180 * orientation) * x - math.sin(-math.pi / 180 * orientation) * y),
+                         (math.sin(-math.pi / 180 * orientation) * x + math.cos(-math.pi / 180 * orientation) * y)] for
+                        x, y in
+                        self.vectors_org]
+
+        self.birth_time = time.time()
+        self.update()
+
+    def collision(self):
+        return (pygame.sprite.spritecollideany(self, self.game_map.objects) or
+                pygame.sprite.spritecollideany(self, self.game_map.enemies))
+
+    def update(self):
+        if self.collision() or time.time() - self.birth_time > 1:
+            self.game_map.remove_projectile(self)
+        vec = self.vectors[0]
+        self.x += vec[0] * self.speed
+        self.x_scaled += vec[0] * self.speed_scaled
+        self.rect.x = self.x_scaled
+        self.y += vec[1] * self.speed
+        self.y_scaled += vec[1] * self.speed_scaled
+        self.rect.y = self.y_scaled
+        pass
+
+
+class Enemy(GameObject):
+    def __init__(self, screen, game_map, width, height, x, y):
+        super().__init__(screen, game_map, width, height, x, y)
+        self.type = "opaque"
+        self.image = pygame.Surface((self.width_scaled, self.height_scaled))
+        self.color = hex_to_rgb("#aa0000") + [255]
+        # self.color = [136.0, 227.0, 247.0, 122]
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect(
+            topleft=(self.x_scaled, self.y_scaled))
+        self.speed = 1.5
+        self.speed_scaled = self.speed * self.game_map.scale
+        self.vectors_org = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+        self.orientation = random.random() * 360
+        self.vectors = [[(math.cos(-math.pi / 180 * self.orientation) * x
+                          - math.sin(-math.pi / 180 * self.orientation) * y),
+                         (math.sin(-math.pi / 180 * self.orientation) * x
+                          + math.cos(-math.pi / 180 * self.orientation) * y)] for x, y in
+                        self.vectors_org]
+        self.noise = PerlinNoise(octaves=3)
+        self.n_i = random.random()
+        self.health = 10
+
+    def rotate_vectors(self, angle):
+        self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
+                         (math.sin(-math.pi / 180 * angle) * x + math.cos(-math.pi / 180 * angle) * y)] for x, y in
+                        self.vectors_org]
+
+    def collision(self):
+        return pygame.sprite.spritecollideany(self, self.game_map.objects)
+
+    def is_shot(self):
+        return pygame.sprite.spritecollideany(self, self.game_map.projectiles)
+
+    def move(self):
+        self.n_i += 0.003
+        angle = (self.noise([self.n_i, self.n_i]) * 360)
+        # print(angle)
+        self.rotate_vectors(angle)
+        vec = self.vectors[2]
+
+        self.x += vec[0] * self.speed
+        self.x_scaled += vec[0] * self.speed_scaled
+        self.rect.x = self.x_scaled
+        if self.collision():
+            self.x -= vec[0] * self.speed
+            self.x_scaled -= vec[0] * self.speed_scaled
+
+            self.rect.x = self.x_scaled
+            self.vectors_org[2][0] *= -1
+        self.y += vec[1] * self.speed
+        self.y_scaled += vec[1] * self.speed_scaled
+        self.rect.y = self.y_scaled
+        if self.collision():
+            self.y -= vec[1] * self.speed
+            self.y_scaled -= vec[1] * self.speed_scaled
+            self.rect.y = self.y_scaled
+            self.vectors_org[2][1] *= -1
+
+    def update(self):
+        if self.is_shot():
+            self.health -= 1
+            self.color = [min(255, c + 20) for c in self.color]
+            self.image.fill(self.color)
+            if self.health < 1:
+                self.game_map.remove_enemy(self)
+        self.move()
         pass
 
 
@@ -189,6 +325,10 @@ class Player(GameObject):
         self.speed = self.speed_walk
         self.speed_scaled = self.speed_walk_scaled
 
+        # Shoot
+        if pygame.mouse.get_pressed()[0] or self.game_map.keys[pygame.K_UP]:
+            self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
+                                                    5, 5, self.x, self.y, self.orientation))
         # Check speed modifiers
         if self.game_map.keys[pygame.K_LSHIFT]:
             self.speed = self.speed_sprint
@@ -198,10 +338,10 @@ class Player(GameObject):
             self.speed_scaled = self.speed_crouch_scaled
 
         # Check movement keys
-        if self.game_map.keys[pygame.K_w] or pygame.mouse.get_pressed()[0]:
+        if self.game_map.keys[pygame.K_w]:
             vector_moved[0] += self.vectors[0][0]
             vector_moved[1] += self.vectors[0][1]
-        if self.game_map.keys[pygame.K_s] or pygame.mouse.get_pressed()[2]:
+        if self.game_map.keys[pygame.K_s]:
             vector_moved[0] += self.vectors[1][0]
             vector_moved[1] += self.vectors[1][1]
         if self.game_map.keys[pygame.K_a]:
@@ -272,7 +412,13 @@ class Player(GameObject):
     def collision(self):
         return pygame.sprite.spritecollideany(self, self.game_map.objects)
 
+    def is_killed(self):
+        return pygame.sprite.spritecollideany(self, self.game_map.enemies)
+
     def update(self):
+        if self.is_killed():
+            if self.game_map.renderer:
+                self.game_map.renderer.over = 1
         self.player_input()
 
     def draw(self):

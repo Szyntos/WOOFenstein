@@ -14,6 +14,7 @@ class Renderer:
         self.ray_count = ray_count  # Actual number of rays is 2*ray_count-1
         self.ray_collisions = []
         self.obj_col = []
+        self.over = 0
 
         self.angles = [math.atan(i / ray_count * math.tan(fov / 2 * math.pi / 180)) * 180 / math.pi for i in
                        range(-ray_count, ray_count + 1)]  # Angle between camera orientation and each ray
@@ -47,7 +48,9 @@ class Renderer:
                    r * math.cos((orient + self.angles[abs(i)] + 180) * math.pi / 180) + y0]
                   for i in range(len(self.angles))]
 
-        objects = self.game_map.objects.sprites()
+        objects = (self.game_map.objects.sprites() +
+                   self.game_map.enemies.sprites() +
+                   self.game_map.projectiles.sprites())
 
         # Due to all objects being rectangles we can check only the collisions between rays and edges
         object_corners = []
@@ -66,7 +69,7 @@ class Renderer:
         right = 0 <= (orient - self.fov / 2 + 180) % 360 <= 180 or 0 <= (orient + self.fov / 2 + 180) % 360 <= 180
         left = 0 <= (orient - self.fov / 2) % 360 <= 180 or 0 <= (orient + self.fov / 2) % 360 <= 180
         i = 0
-        for obj in self.game_map.objects.sprites():
+        for obj in objects:
             obj_center = (obj.x + obj.width / 2, obj.y + obj.height / 2)
             # if object is not behind the camera
             if not ((not down) and obj.y > y0 or (not up) and obj.y + obj.height < y0 or (not left) and
@@ -174,6 +177,9 @@ class Renderer:
             j += 1
 
     def render(self):
+        if self.over:
+            self.game_map.screen.blit(self.bg, (0, 0))
+            return
         # draw the ceiling and the floor
         self.game_map.screen.blit(self.ceil, (0, 0))
         self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2))
