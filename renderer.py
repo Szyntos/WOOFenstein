@@ -1,8 +1,5 @@
-import math
-
-import pygame
-
-import map
+from imports import *
+from map import *
 from utils import *
 
 
@@ -141,7 +138,7 @@ class Renderer:
             collisions_proper = self.ray_collisions[i]
             if i == int(len(self.ray_collisions) / 2) or i == 0 or i == len(self.ray_collisions) - 1:
                 lines = []
-                for_lines = [[[self.x0, self.y0], map.GameObject(0, self.game_map, 0, 0, 0, 0)]] + collisions_proper
+                for_lines = [[[self.x0, self.y0], GameObject(0, self.game_map, 0, 0, 0, 0)]] + collisions_proper
                 for j in range(len(for_lines) - 1):
                     lines.append([[for_lines[j][0][0] * self.game_map.scale + self.game_map.vector[0],
                                    for_lines[j][0][1] * self.game_map.scale + self.game_map.vector[1]],
@@ -217,11 +214,11 @@ class Renderer:
                     sat = 1.5
                     cu = saturation(cu, sat)
                     cd = saturation(cd, sat)
-
-                    pygame.draw.rect(self.game_map.screen, pygame.Color(cu),
-                                     pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 -
-                                                 (const * (distances_normalised[i][j][0])) / 2 + h, dw + 1,
-                                                 const * (distances_normalised[i][j][0]) / 2))
+                    if not type(distances_normalised[i][j][1]) == Projectile:
+                        pygame.draw.rect(self.game_map.screen, pygame.Color(cu),
+                                         pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 -
+                                                     (const * (distances_normalised[i][j][0])) / 2 + h, dw + 1,
+                                                     const * (distances_normalised[i][j][0]) / 2))
                     pygame.draw.rect(self.game_map.screen, pygame.Color(cd),
                                      pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 - 1 + h, dw + 1,
                                                  const * distances_normalised[i][j][0] / 2))

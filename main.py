@@ -1,7 +1,6 @@
 from map import *
-from sys import exit
 from renderer import *
-import time
+from imports import *
 
 # Setting map constants
 scale = 0.75
