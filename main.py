@@ -8,7 +8,7 @@ scale = 0.75
 MAP_WIDTH = 900
 MAP_HEIGHT = 900
 RAY_COUNT = 70  # Actual number of rays is 2*RAY_COUNT-1
-FOV = 90
+FOV = 110
 
 RENDER_WIDTH = 2 * MAP_WIDTH
 RENDER_HEIGHT = MAP_HEIGHT
@@ -76,7 +76,7 @@ game_map.add_player(Player(screen, game_map, 5, 5, MAP_WIDTH // 2 - 20, MAP_HEIG
 
 
 # start = time.time()
-i = 0
+i = 70
 while True:
     # if time.time() - start > 20:
     #     pygame.quit()
@@ -95,7 +95,8 @@ while True:
             mouse_move = event.rel
         if event.type == pygame.MOUSEWHEEL:
             i += event.y
-
+            i = max(1, i)
+    # renderer.set_ray_count(i)
     game_map.player.sprite.rotate_mouse(mouse_move)
 
     renderer.generate_rays(game_map.player.sprite.x + game_map.player.sprite.width / 2,
@@ -104,7 +105,7 @@ while True:
     renderer.render()
     game_map.draw()
     game_map.update()
-    # renderer.draw_rays()
+    renderer.draw_rays()
     # renderer.draw_visible_edges(game_map.player.sprite.x + game_map.player.sprite.width / 2,
     #                             game_map.player.sprite.y + game_map.player.sprite.height / 2,
     #                             game_map.player.sprite.orientation)

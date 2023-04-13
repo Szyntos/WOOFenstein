@@ -77,7 +77,7 @@ class Enemy(GameObject):
                         self.vectors_org]
         self.noise = PerlinNoise(octaves=3)
         self.n_i = random.random()
-        self.health = 10
+        self.health = 4
 
     def rotate_vectors(self, angle):
         self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
@@ -118,7 +118,7 @@ class Enemy(GameObject):
     def update(self):
         if self.is_shot():
             self.health -= 1
-            self.color = [min(255, c + 20) for c in self.color]
+            self.color = [min(255, c + 50) for c in self.color]
             self.image.fill(self.color)
             if self.health < 1:
                 self.game_map.remove_enemy(self)
@@ -192,14 +192,12 @@ class Player(GameObject):
 
         # Shoot
         if pygame.mouse.get_pressed()[0] or self.game_map.keys[pygame.K_UP]:
-            if not self.flag:
-                self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
-                                                        5, 5, self.x, self.y, self.orientation, 5, 5))
-            self.flag = 1
+            self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
+                                                    5, 5, self.x-2.5, self.y-2.5, self.orientation, 5, 5))
         elif pygame.mouse.get_pressed()[2] or self.game_map.keys[pygame.K_DOWN]:
             if not self.flag:
                 self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
-                                                        50, 50, self.x, self.y, self.orientation, 1, 20))
+                                                        50, 50, self.x-25, self.y-25, self.orientation, 1, 20))
             self.flag = 1
         else:
             self.flag = 0

@@ -35,6 +35,18 @@ class Renderer:
         self.x0 = 0
         self.y0 = 0
 
+    def set_fov(self, fov):
+        self.fov = fov
+        self.angles = [math.atan(i / self.ray_count * math.tan(fov / 2 * math.pi / 180)) * 180 / math.pi for i in
+                       range(-self.ray_count, self.ray_count + 1)]  # Angle between camera orientation and each ray
+        self.scales = [1 / math.cos(a * math.pi / 180) for a in self.angles]  # Scaling factor for each ray
+
+    def set_ray_count(self, ray_count):
+        self.ray_count = ray_count
+        self.angles = [math.atan(i / self.ray_count * math.tan(self.fov / 2 * math.pi / 180)) * 180 / math.pi for i in
+                       range(-self.ray_count, self.ray_count + 1)]  # Angle between camera orientation and each ray
+        self.scales = [1 / math.cos(a * math.pi / 180) for a in self.angles]  # Scaling factor for each ray
+
     def generate_data(self, x0, y0, orient):
         self.x0 = x0
         self.y0 = y0
@@ -131,12 +143,12 @@ class Renderer:
             self.ray_collisions[i] = collisions_proper
             i += 1
 
-    def draw_rays(self):
+    def draw_rays(self, all=0):
         # Draw the main ray and two rays on the boundary of the fov
         i = 0
         for i in range(len(self.ray_collisions)):
             collisions_proper = self.ray_collisions[i]
-            if i == int(len(self.ray_collisions) / 2) or i == 0 or i == len(self.ray_collisions) - 1:
+            if i == int(len(self.ray_collisions) / 2) or i == 0 or i == len(self.ray_collisions) - 1 or all:
                 lines = []
                 for_lines = [[[self.x0, self.y0], GameObject(0, self.game_map, 0, 0, 0, 0)]] + collisions_proper
                 for j in range(len(for_lines) - 1):

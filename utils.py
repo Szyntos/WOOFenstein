@@ -1,6 +1,9 @@
 def distance_inverse(p1, p2):
     # return distance_2(p1, p2)
-    return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** -0.5
+    a = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+    if a == 0:
+        return 0.00001 ** -0.5
+    return a ** -0.5
 
 
 def is_visible(point, camera, orient, fov):
