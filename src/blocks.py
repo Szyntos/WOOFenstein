@@ -1,5 +1,17 @@
-from imports import *
-from map import *
+import pygame
+
+from src.utils import hex_to_rgb
+
+constructors = {}
+
+
+def register_block(constructor):
+    constructors[constructor.__name__] = constructor
+    return constructor
+
+
+def get_block_constructors():
+    return {key: value for key, value in constructors.items()}
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -20,6 +32,7 @@ class GameObject(pygame.sprite.Sprite):
         self.color = (0, 0, 0, 0)
 
 
+@register_block
 class Box(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
@@ -35,6 +48,7 @@ class Box(GameObject):
         pass
 
 
+@register_block
 class RedBox(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
@@ -49,6 +63,7 @@ class RedBox(GameObject):
         pass
 
 
+@register_block
 class Glass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
@@ -64,6 +79,7 @@ class Glass(GameObject):
         pass
 
 
+@register_block
 class RedGlass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)
@@ -79,6 +95,7 @@ class RedGlass(GameObject):
         pass
 
 
+@register_block
 class GreenGlass(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)

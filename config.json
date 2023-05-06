@@ -1,0 +1,8 @@
+{
+  "scale": 0.75,
+  "map width": 900,
+  "map height": 900,
+  "ray count": 70,
+  "fov": 110,
+  "map scale": 0.4
+}

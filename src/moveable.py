@@ -1,6 +1,22 @@
-from imports import *
-from map import *
-from blocks import *
+import math
+import time
+import random
+from perlin_noise import PerlinNoise
+import pygame
+
+from src.blocks import GameObject
+from src.utils import hex_to_rgb
+
+
+def rotate_vector(angle: float, vectors_org: list[list[int, int]]
+                  ) -> list[list[float, float]]:
+    vectors = []
+    alpha = -math.pi / 180 * angle
+    for x, y in vectors_org:
+        a = math.cos(alpha) * x - math.sin(alpha) * y
+        b = math.sin(alpha) * x + math.cos(alpha) * y
+        vectors.append([a, b])
+    return vectors
 
 
 class Projectile(GameObject):
@@ -17,10 +33,7 @@ class Projectile(GameObject):
         self.speed = speed
         self.speed_scaled = self.speed * self.game_map.scale
         self.vectors_org = [[0, -1], [0, 1], [-1, 0], [1, 0]]
-        self.vectors = [[(math.cos(-math.pi / 180 * orientation) * x - math.sin(-math.pi / 180 * orientation) * y),
-                         (math.sin(-math.pi / 180 * orientation) * x + math.cos(-math.pi / 180 * orientation) * y)] for
-                        x, y in
-                        self.vectors_org]
+        self.vectors = rotate_vector(self.orientation, self.vectors_org)
 
         self.birth_time = time.time()
         self.time_alive = time_alive
@@ -53,7 +66,6 @@ class Projectile(GameObject):
             self.x_scaled -= vec[1] * self.speed_scaled
             self.rect.x = self.x_scaled
             self.vectors[0][1] *= -1
-        pass
 
 
 class Enemy(GameObject):
@@ -70,19 +82,11 @@ class Enemy(GameObject):
         self.speed_scaled = self.speed * self.game_map.scale
         self.vectors_org = [[0, -1], [0, 1], [-1, 0], [1, 0]]
         self.orientation = random.random() * 360
-        self.vectors = [[(math.cos(-math.pi / 180 * self.orientation) * x
-                          - math.sin(-math.pi / 180 * self.orientation) * y),
-                         (math.sin(-math.pi / 180 * self.orientation) * x
-                          + math.cos(-math.pi / 180 * self.orientation) * y)] for x, y in
-                        self.vectors_org]
+        self.vectors = rotate_vector(self.orientation, self.vectors_org)
+
         self.noise = PerlinNoise(octaves=3)
         self.n_i = random.random()
         self.health = 4
-
-    def rotate_vectors(self, angle):
-        self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
-                         (math.sin(-math.pi / 180 * angle) * x + math.cos(-math.pi / 180 * angle) * y)] for x, y in
-                        self.vectors_org]
 
     def collision(self):
         return pygame.sprite.spritecollideany(self, self.game_map.objects)
@@ -94,7 +98,7 @@ class Enemy(GameObject):
         self.n_i += 0.003
         angle = (self.noise([self.n_i, self.n_i]) * 360)
         # print(angle)
-        self.rotate_vectors(angle)
+        self.vectors = rotate_vector(angle, self.vectors_org)
         vec = self.vectors[2]
 
         self.x += vec[0] * self.speed
@@ -123,13 +127,22 @@ class Enemy(GameObject):
             if self.health < 1:
                 self.game_map.remove_enemy(self)
         self.move()
-        pass
 
 
 class Player(GameObject):
+    def _set_initial_orientation(self, initial_orientation: float):
+        if initial_orientation:
+            self.orientation += initial_orientation
+            self.vectors = rotate_vector(self.orientation, self.vectors_org)
+            self.rotate(self.orientation)
+            if self.collision():
+                self.orientation -= initial_orientation
+                self.rotate(self.orientation)
+            self.orientation = self.orientation % 360
+
     def __init__(self, screen, game_map, width, height, x, y, initial_orientation=0):
         super().__init__(screen, game_map, width, height, x, y)
-        filename = "P_2.png"
+        filename = "./img/P_2.png"
         # Original image, used to rotate the sprite
         self.org = pygame.Surface((self.width_scaled, self.height_scaled))
         self.org.fill((255, 255, 255))
@@ -166,14 +179,7 @@ class Player(GameObject):
         self.vectors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
         self.flag = 0
 
-        if initial_orientation:
-            self.orientation += initial_orientation
-            self.rotate_vectors(self.orientation)
-            self.rotate(self.orientation)
-            if self.collision():
-                self.orientation -= initial_orientation
-                self.rotate(self.orientation)
-            self.orientation = self.orientation % 360
+        self._set_initial_orientation(initial_orientation)
 
     def move_vector(self, vec):
         self.x += vec[0] * self.speed
@@ -185,12 +191,7 @@ class Player(GameObject):
         self.rect.y = self.y_scaled
         self.image_rect.center = (self.x_scaled + self.width_scaled / 2, self.y_scaled + self.height_scaled / 2)
 
-    def player_input(self):
-        vector_moved = [0, 0]
-        self.speed = self.speed_walk
-        self.speed_scaled = self.speed_walk_scaled
-
-        # Shoot
+    def _check_shoot(self):
         if pygame.mouse.get_pressed()[0] or self.game_map.keys[pygame.K_UP]:
             self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
                                                     5, 5, self.x-2.5, self.y-2.5, self.orientation, 5, 5))
@@ -201,7 +202,8 @@ class Player(GameObject):
             self.flag = 1
         else:
             self.flag = 0
-        # Check speed modifiers
+
+    def _check_speed_modifiers(self):
         if self.game_map.keys[pygame.K_LSHIFT]:
             self.speed = self.speed_sprint
             self.speed_scaled = self.speed_sprint_scaled
@@ -209,59 +211,63 @@ class Player(GameObject):
             self.speed = self.speed_crouch
             self.speed_scaled = self.speed_crouch_scaled
 
-        # Check movement keys
-        if self.game_map.keys[pygame.K_w]:
-            vector_moved[0] += self.vectors[0][0]
-            vector_moved[1] += self.vectors[0][1]
-        if self.game_map.keys[pygame.K_s]:
-            vector_moved[0] += self.vectors[1][0]
-            vector_moved[1] += self.vectors[1][1]
-        if self.game_map.keys[pygame.K_a]:
-            vector_moved[0] += self.vectors[2][0]
-            vector_moved[1] += self.vectors[2][1]
-        if self.game_map.keys[pygame.K_d]:
-            vector_moved[0] += self.vectors[3][0]
-            vector_moved[1] += self.vectors[3][1]
+    def _check_movement_keys(self, vector_moved: list[int, int]):
+        keys = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
+        for i, key in enumerate(keys):
+            if self.game_map.keys[key]:
+                vector_moved[0] += self.vectors[i][0]
+                vector_moved[1] += self.vectors[i][1]
 
-        # Normalise speed
+    def _normalise_speed(self, vector_moved: list[int, int]):
         s = math.sqrt(vector_moved[0] ** 2 + vector_moved[1] ** 2)
         if s > 1:
             vector_moved[0] *= 1 / s
             vector_moved[1] *= 1 / s
 
+    def _move_x(self, vector_moved: list[int, int]):
         self.move_vector([vector_moved[0], 0])
         # Check collision in x
         if self.collision():
             self.move_vector([-vector_moved[0], 0])
 
+    def _move_y(self, vector_moved: list[int, int]):
         self.move_vector([0, vector_moved[1]])
         # Check collision in y
         if self.collision():
             self.move_vector([0, -vector_moved[1]])
 
-        # Check rotating keys
+    def _check_rotating_keys(self) -> float:
         angle = 0
         if self.game_map.keys[pygame.K_RIGHT]:
             self.orientation -= self.angular_speed
             angle -= self.angular_speed
-            self.rotate_vectors(self.orientation)
+            self.vectors = rotate_vector(self.orientation, self.vectors_org)
             self.rotate(self.orientation)
         if self.game_map.keys[pygame.K_LEFT]:
             self.orientation += self.angular_speed
             angle += self.angular_speed
-            self.rotate_vectors(self.orientation)
+            self.vectors = rotate_vector(self.orientation, self.vectors_org)
             self.rotate(self.orientation)
+        return angle
 
-        # Check rotating collision
+    def _check_rotating_collision(self, angle: float):
         if self.collision():
             self.orientation -= angle
             self.rotate(self.orientation)
         self.orientation = self.orientation % 360
 
-    def rotate_vectors(self, angle):
-        self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
-                         (math.sin(-math.pi / 180 * angle) * x + math.cos(-math.pi / 180 * angle) * y)] for x, y in
-                        self.vectors_org]
+    def player_input(self):
+        vector_moved = [0, 0]
+        self.speed = self.speed_walk
+        self.speed_scaled = self.speed_walk_scaled
+        self._check_shoot()
+        self._check_speed_modifiers()
+        self._check_movement_keys(vector_moved)
+        self._normalise_speed(vector_moved)
+        self._move_x(vector_moved)
+        self._move_y(vector_moved)
+        angle = self._check_rotating_keys()
+        self._check_rotating_collision(angle)
 
     def rotate(self, angle):
         rotated_image = pygame.transform.rotate(self.org, angle)
@@ -274,7 +280,7 @@ class Player(GameObject):
         angle = 0
         self.orientation -= mouse_move[0] / 10 * sensitivity
         angle -= mouse_move[0] / 10 * sensitivity
-        self.rotate_vectors(self.orientation)
+        self.vectors = rotate_vector(self.orientation, self.vectors_org)
         self.rotate(self.orientation)
         if self.collision():
             self.orientation -= angle

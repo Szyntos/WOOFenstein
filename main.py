@@ -1,118 +1,156 @@
-from map import *
-from renderer import *
-from imports import *
+from sys import exit
+import pygame
+import json
 
-# Setting map constants
-scale = 0.75
-
-MAP_WIDTH = 900
-MAP_HEIGHT = 900
-RAY_COUNT = 70  # Actual number of rays is 2*RAY_COUNT-1
-FOV = 110
-
-RENDER_WIDTH = 2 * MAP_WIDTH
-RENDER_HEIGHT = MAP_HEIGHT
-
-WINDOW_WIDTH = 0 * MAP_WIDTH + RENDER_WIDTH
-WINDOW_HEIGHT = max(RENDER_HEIGHT, MAP_HEIGHT)
-
-MAP_WIDTH *= scale
-MAP_HEIGHT *= scale
-RENDER_WIDTH *= scale
-RENDER_HEIGHT *= scale
-WINDOW_WIDTH *= scale
-WINDOW_HEIGHT *= scale
-
-pygame.init()
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("WOOFenstien")
-font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
-clock = pygame.time.Clock()
-pygame.event.set_grab(True)
-pygame.mouse.set_visible(False)
-
-map_scale = 0.4
-game_map = GameMap(screen, MAP_WIDTH, MAP_HEIGHT, [RENDER_WIDTH - MAP_WIDTH * map_scale, 0], map_scale)
-renderer = Renderer(game_map, RENDER_WIDTH, FOV, RAY_COUNT)
-game_map.renderer = renderer
-
-# Adding objects to the map
-game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, 0))
-game_map.add_object(Box(screen, game_map, MAP_WIDTH, 10, 0, MAP_HEIGHT - 10))
-game_map.add_object(RedBox(screen, game_map, 10, MAP_HEIGHT - 20, 0, 10))
-game_map.add_object(Box(screen, game_map, 10, MAP_HEIGHT - 20, MAP_WIDTH - 10, 10))
-
-game_map.add_object(Box(screen, game_map, 100, 10, 100, 100))
-game_map.add_object(Box(screen, game_map, 10, 50, 300, 100))
-
-game_map.add_object(Box(screen, game_map, 10, 10, 300, 300))
-game_map.add_object(GreenGlass(screen, game_map, 10, 100, 200, 100))
-game_map.add_object(GreenGlass(screen, game_map, 100, 100, 50, 350))
-game_map.add_object(Glass(screen, game_map, 100, 10, 350, 350))
-game_map.add_object(Box(screen, game_map, 10, 50, 400, 390))
-game_map.add_object(RedGlass(screen, game_map, 10, 100, 150, 120))
-
-game_map.add_object(Glass(screen, game_map, 5, 100, 550, 100))
-game_map.add_object(GreenGlass(screen, game_map, 5, 100, 540, 100))
-game_map.add_object(RedGlass(screen, game_map, 5, 100, 530, 100))
-
-# Adding enemy to the map
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-game_map.add_enemy(Enemy(screen, game_map, 10, 10, MAP_WIDTH // 2, MAP_HEIGHT // 2))
-
-# Adding player to the map
-game_map.add_player(Player(screen, game_map, 5, 5, MAP_WIDTH // 2 - 20, MAP_HEIGHT // 2 + 200))
-# game_map.add_player(Player(screen, game_map, 5, 5, 555, 150, 90))
+from src.blocks import get_block_constructors
+from src.map import GameMap
+from src.moveable import Player, Enemy
+from src.renderer import Renderer
 
 
-# start = time.time()
-i = 70
-while True:
-    # if time.time() - start > 20:
-    #     pygame.quit()
-    #     exit()
+class ConfigLoader:
+    def __init__(self, config: str, map_config: str):
+        self.config = config
+        self.map_config = map_config
+        self.scale = None
+        self.map_width = None
+        self.map_height = None
+        # Actual number of rays is 2*RAY_COUNT-1
+        self.ray_count = None
+        self.fov = None
+        self.map = None
+        self.map_scale = None
 
-    mouse_move = (0, 0)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                exit()
-        if event.type == pygame.MOUSEMOTION:
-            mouse_move = event.rel
-        if event.type == pygame.MOUSEWHEEL:
-            i += event.y
-            i = max(1, i)
-    # renderer.set_ray_count(i)
-    game_map.player.sprite.rotate_mouse(mouse_move)
+    def load_config(self):
+        with open(self.config, "r") as f:
+            config_data = json.load(f)
+        self.scale = config_data["scale"]
+        self.map_width = config_data["map width"]
+        self.map_height = config_data["map height"]
+        self.ray_count = config_data["ray count"]
+        self.fov = config_data["fov"]
+        self.map_scale = config_data["map scale"]
+        self._scale_map_attributes()
 
-    renderer.generate_rays(game_map.player.sprite.x + game_map.player.sprite.width / 2,
-                           game_map.player.sprite.y + game_map.player.sprite.height / 2,
-                           game_map.player.sprite.orientation)
-    renderer.render()
-    game_map.draw()
-    game_map.update()
-    renderer.draw_rays()
-    # renderer.draw_visible_edges(game_map.player.sprite.x + game_map.player.sprite.width / 2,
-    #                             game_map.player.sprite.y + game_map.player.sprite.height / 2,
-    #                             game_map.player.sprite.orientation)
+    def _render_width(self):
+        return 2 * self.map_width
 
-    # Show FPS
-    text = font.render(str(int(clock.get_fps())), True, "black")
-    screen.blit(text, (10, 10))
+    def _render_height(self):
+        return self.map_height
 
-    pygame.display.update()
-    clock.tick(60)
+    def _window_width(self):
+        return 0 * self.map_width + self._render_width()
+
+    def _window_height(self):
+        return max(self._render_height(), self.map_height)
+
+    def _scale_map_attributes(self):
+        self.map_height *= self.scale
+        self.map_width *= self.scale
+
+    def _get_vector(self):
+        return [self._render_width() - self.map_width * self.map_scale, 0]
+
+    def get_screen(self) -> pygame.Surface | pygame.SurfaceType:
+        mode = (self._window_width(), self._window_height())
+        return pygame.display.set_mode(mode)
+
+    def create_map(self, screen: pygame.Surface | pygame.SurfaceType):
+        self.map = GameMap(screen, self.map_width, self.map_height,
+                           self._get_vector(), self.map_scale)
+
+    def populate_map(self, screen: pygame.Surface | pygame.SurfaceType):
+        with open(self.map_config, "r") as f:
+            objects = json.load(f)
+
+        block_constructors = get_block_constructors()
+        for obj in objects:
+            width = obj["width"]
+            height = obj["height"]
+            x = obj["x"]
+            y = obj["y"]
+            if obj["type"] == "Player":
+                player = Player(screen, self.map, width, height, x, y)
+                self.map.add_player(player)
+            elif obj["type"] == "Enemy":
+                enemy = Enemy(screen, self.map, width, height, x, y)
+                self.map.add_enemy(enemy)
+            else:
+                constructor = block_constructors[obj["type"]]
+                block = constructor(screen, self.map, width, height, x, y)
+                self.map.add_object(block)
+
+    def create_renderer(self) -> Renderer:
+        return Renderer(self.map, self._render_width(),
+                        self.fov, self.ray_count)
+
+
+class Client:
+    def __init__(self):
+        self.config_loader = ConfigLoader("config.json", "map.json")
+        self.config_loader.load_config()
+
+        self.screen = self.config_loader.get_screen()
+
+        self.config_loader.create_map(self.screen)
+        self.config_loader.populate_map(self.screen)
+        self.map = self.config_loader.map
+        self.renderer = self.config_loader.create_renderer()
+        self.map.renderer = self.renderer
+
+        pygame.init()
+        self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
+        self.clock = pygame.time.Clock()
+
+        pygame.display.set_caption("WOOFenstien")
+        pygame.event.set_grab(True)
+        pygame.mouse.set_visible(False)
+
+    def run(self):
+        # start = time.time()
+        i = 70
+        while True:
+            # if time.time() - start > 20:
+            #     pygame.quit()
+            #     exit()
+
+            mouse_move = (0, 0)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        exit()
+                if event.type == pygame.MOUSEMOTION:
+                    mouse_move = event.rel
+                if event.type == pygame.MOUSEWHEEL:
+                    i += event.y
+                    i = max(1, i)
+            # renderer.set_ray_count(i)
+            sprite = self.map.player.sprite
+            sprite.rotate_mouse(mouse_move)
+            self.renderer.generate_rays(sprite.x + sprite.width / 2,
+                                        sprite.y + sprite.height / 2,
+                                        sprite.orientation)
+            self.renderer.render()
+            self.map.draw()
+            self.map.update()
+            self.renderer.draw_rays()
+            # self.renderer.draw_visible_edges(sprite.x + sprite.width / 2,
+            #                             sprite.y + sprite.height / 2,
+            #                             sprite.orientation)
+
+            # Show FPS
+            fps = int(self.clock.get_fps())
+            text = self.font.render(str(fps), True, "black")
+            self.screen.blit(text, (10, 10))
+
+            pygame.display.update()
+            self.clock.tick(60)
+
+
+if __name__ == "__main__":
+    client = Client()
+    client.run()

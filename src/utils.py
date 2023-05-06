@@ -1,35 +1,42 @@
-def distance_inverse(p1, p2):
+from collections import namedtuple
+
+
+Point = namedtuple("Point", "x y")
+Direction = namedtuple("Direction", "up down right left")
+
+
+def distance_inverse(p1: Point, p2: Point) -> float:
     # return distance_2(p1, p2)
-    a = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+    a = ((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
     if a == 0:
         return 0.00001 ** -0.5
     return a ** -0.5
 
 
-def is_visible(point, camera, orient, fov):
+def is_visible(point: Point, camera: Point, orient: float, fov: float) -> bool:
     # Check if the point is in the fov (actually if they are in front of the camera)
-    vec = [point[0] - camera[0], point[1] - camera[1]]
+    vec = [point.x - camera.x, point.y - camera.y]
     a = ((DiamondAngle(vec[0], vec[1]) - 2) * 90) % 360
     acc = 5
     return 10 - acc <= (a - orient + fov / 2 + 10) % 360 <= 10 + 180 + acc
 
 
-def distance_no_sqrt(p1, p2):
+def distance_no_sqrt(p1: Point, p2: Point) -> float:
     # return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
     # return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-    if p1[0] > p2[0]:
-        if p1[1] > p2[1]:
-            return p1[0] - p2[0] + p1[1] - p2[1]
-        return p1[0] - p2[0] + p2[1] - p1[1]
-    if p1[1] > p2[1]:
-        return p2[0] - p1[0] + p1[1] - p2[1]
-    return p2[0] - p1[0] + p2[1] - p1[1]
+    if p1.x > p2.x:
+        if p1.y > p2.y:
+            return p1.x - p2.x + p1.y - p2.y
+        return p1.x - p2.x + p2.y - p1.y
+    if p1.y > p2.y:
+        return p2.x - p1.x + p1.y - p2.y
+    return p2.x - p1.x + p2.y - p1.y
 
 
-def distance_2(p1, p2):
+def distance_2(p1: Point, p2: Point) -> float:
     # Copied from the Doom wiki
-    dx = (abs(p1[0] - p2[0]))
-    dy = (abs(p1[1] - p2[1]))
+    dx = (abs(p1.x - p2.x))
+    dy = (abs(p1.y - p2.y))
     m = max(dx, dy)
     dx /= m
     dy /= m
@@ -40,7 +47,7 @@ def distance_2(p1, p2):
     return (dx + dy - (dy >> 1)) * m
 
 
-def angle_between_lines(edge_index, angle):
+def angle_between_lines(edge_index: float, angle: float) -> float:
     # Old, computationally expensive code
 
     # v1 = [l1[1][0] - l1[0][0], l1[1][1] - l1[0][1]]
@@ -73,7 +80,7 @@ def angle_between_lines(edge_index, angle):
     return a
 
 
-def is_between(x, a, b):
+def is_between(x: float, a: float, b: float) -> int:
     eps = 0.001
     tmp = b
     b = max(a, b)
@@ -93,7 +100,7 @@ def same_direction(p, q):
     return 0
 
 
-def approx_equals(a, b):
+def approx_equals(a: float, b: float) -> int:
     eps = 0.0001
     if b - eps < a < b + eps:
         return 1
@@ -165,4 +172,4 @@ def line_intersection(ray, edge):
     elif numerator_b > 0 or numerator_b < denominator:
         return ray[1]
     a = numerator_a / denominator
-    return [ray[0][0] + a * A[0], ray[0][1] + a * A[1]]
+    return Point(ray[0][0] + a * A[0], ray[0][1] + a * A[1])

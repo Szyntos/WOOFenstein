@@ -1,7 +1,4 @@
-from imports import *
-from utils import *
-from blocks import *
-from moveable import *
+import pygame
 
 
 class GameMap:
