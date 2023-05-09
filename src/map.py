@@ -16,9 +16,19 @@ class GameMap:
         self.player = pygame.sprite.GroupSingle()
         self.keys = pygame.key.get_pressed()
         self.renderer = None
+        self.objectives = pygame.sprite.Group()
+
+    def add_objective(self, obj):
+        self.objectives.add(obj)
+
+    def remove_objective(self, obj):
+        self.objectives.remove(obj)
 
     def add_object(self, obj):
         self.objects.add(obj)
+
+    def remove_object(self, obj):
+        self.objects.remove(obj)
 
     def add_enemy(self, obj):
         self.enemies.add(obj)
@@ -34,8 +44,11 @@ class GameMap:
         self.projectiles.remove(obj)
         del obj
 
-    def add_player(self, pla):
+    def set_player(self, pla):
         self.player = pygame.sprite.GroupSingle(pla)
+
+    def remove_player(self, pla):
+        self.player.remove(pla)
 
     def update(self):
         self.keys = pygame.key.get_pressed()
@@ -45,11 +58,24 @@ class GameMap:
             enemy.update()
         for projectile in self.projectiles.sprites():
             projectile.update()
-        self.player.sprite.update()
+        for objective in self.objectives.sprites():
+            objective.update()
+        if self.player:
+            self.player.sprite.update()
 
     def draw(self):
         self.screen.blit(self.bg, (self.vector[0], self.vector[1]))
         self.objects.draw(self.screen)
         self.enemies.draw(self.screen)
         self.projectiles.draw(self.screen)
-        self.player.sprite.draw()
+        if self.player:
+            self.player.sprite.draw()
+
+    def all_objectives_met(self):
+        if not self.objectives.sprites():
+            return False
+
+        for obj in self.objectives.sprites():
+            if not obj.passed:
+                return False
+        return True

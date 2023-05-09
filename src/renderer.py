@@ -94,7 +94,8 @@ class Renderer:
     def _get_objects(self) -> list:  # list[_TSprite]
         return (self.game_map.objects.sprites() +
                 self.game_map.enemies.sprites() +
-                self.game_map.projectiles.sprites())
+                self.game_map.projectiles.sprites() +
+                self.game_map.objectives.sprites())
 
     def _get_corners(self, objects: list) -> list[list[utils.Point]]:
         corners = []
@@ -129,7 +130,6 @@ class Renderer:
         self.cam_position = utils.Point(x0, y0)
 
     def move_camera(self, x0: float, y0: float, orient: float):
-        # TODO rewrite (god like method)
         self.cam_position = utils.Point(x0, y0)
         # Generating rays' endpoints
         circle = self._create_circle(orient)
@@ -263,7 +263,6 @@ class Renderer:
         return distances
 
     def render(self):
-        # TODO: rewrite (god-like method)
         if self.over:
             self.game_map.screen.blit(self.bg, (0, 0))
             return

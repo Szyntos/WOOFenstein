@@ -2,6 +2,7 @@ from collections import namedtuple
 
 
 Point = namedtuple("Point", "x y")
+
 Direction = namedtuple("Direction", "up down right left")
 
 

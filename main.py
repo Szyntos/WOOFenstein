@@ -2,6 +2,7 @@ from sys import exit
 import pygame
 import json
 
+from src.objectives import Objective
 from src.blocks import get_block_constructors
 from src.map import GameMap
 from src.moveable import Player, Enemy
@@ -71,10 +72,13 @@ class ConfigLoader:
             y = obj["y"]
             if obj["type"] == "Player":
                 player = Player(screen, self.map, width, height, x, y)
-                self.map.add_player(player)
+                self.map.set_player(player)
             elif obj["type"] == "Enemy":
                 enemy = Enemy(screen, self.map, width, height, x, y)
                 self.map.add_enemy(enemy)
+            elif obj["type"] == "Objective":
+                objective = Objective(screen, self.map, width, height, x, y)
+                self.map.add_objective(objective)
             else:
                 constructor = block_constructors[obj["type"]]
                 block = constructor(screen, self.map, width, height, x, y)
@@ -128,6 +132,9 @@ class Client:
                 if event.type == pygame.MOUSEWHEEL:
                     i += event.y
                     i = max(1, i)
+            if self.map.all_objectives_met():
+                pygame.quit()
+                exit()
             # renderer.set_ray_count(i)
             sprite = self.map.player.sprite
             sprite.rotate_mouse(mouse_move)
