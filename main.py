@@ -145,6 +145,7 @@ class Client:
                         exit()
                 if event.type == pygame.MOUSEMOTION:
                     mouse_move = event.rel
+                    mouse_move = [10 * i for i in mouse_move]
                 if event.type == pygame.MOUSEWHEEL:
                     i += event.y
                     i = max(1, i)
