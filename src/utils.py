@@ -1,6 +1,5 @@
 from collections import namedtuple
 
-
 Point = namedtuple("Point", "x y")
 
 Direction = namedtuple("Direction", "up down right left")
@@ -46,6 +45,10 @@ def distance_2(p1: Point, p2: Point) -> float:
     if dx < dy:
         return (dx + dy - (dx >> 1)) * m
     return (dx + dy - (dy >> 1)) * m
+
+
+def vector_length(vec):
+    return (sum(i ** 2 for i in vec)) ** 0.5
 
 
 def angle_between_lines(edge_index: float, angle: float) -> float:
@@ -101,8 +104,7 @@ def same_direction(p, q):
     return 0
 
 
-def approx_equals(a: float, b: float) -> int:
-    eps = 0.0001
+def approx_equals(a: float, b: float, eps: float = 0.0001) -> int:
     if b - eps < a < b + eps:
         return 1
     return 0

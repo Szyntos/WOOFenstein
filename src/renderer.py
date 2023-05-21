@@ -263,12 +263,13 @@ class Renderer:
         return distances
 
     def render(self):
+        h = -40
         if self.over:
             self.game_map.screen.blit(self.bg, (0, 0))
             return
         # draw the ceiling and the floor
-        self.game_map.screen.blit(self.ceil, (0, 0))
-        self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2))
+        self.game_map.screen.blit(self.ceil, (0, 0 + h))
+        self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2 + h))
 
         # 3D height scaling
         const = self.game_map.height * 50
@@ -278,7 +279,6 @@ class Renderer:
         dw = self.width3d / len(distances_normalised)
 
         c = (0, 0, 0, 255)
-        h = 0
         for i, current_distances in enumerate(distances_normalised):
             for j, distance in enumerate(current_distances):
                 if j == 0:

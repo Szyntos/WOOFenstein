@@ -7,6 +7,7 @@ from src.blocks import get_block_constructors
 from src.map import GameMap
 from src.moveable import Player, Enemy
 from src.renderer import Renderer
+from src.gui import Gui
 
 
 class ConfigLoader:
@@ -21,6 +22,8 @@ class ConfigLoader:
         self.fov = None
         self.map = None
         self.map_scale = None
+        self.player_width = 10
+        self.enemy_width = 10
 
     def load_config(self):
         with open(self.config, "r") as f:
@@ -73,9 +76,11 @@ class ConfigLoader:
             if obj["type"] == "Player":
                 player = Player(screen, self.map, width, height, x, y)
                 self.map.set_player(player)
+                self.player_width = width
             elif obj["type"] == "Enemy":
                 enemy = Enemy(screen, self.map, width, height, x, y)
                 self.map.add_enemy(enemy)
+                self.enemy_width = width
             elif obj["type"] == "Objective":
                 objective = Objective(screen, self.map, width, height, x, y)
                 self.map.add_objective(objective)
@@ -87,6 +92,14 @@ class ConfigLoader:
     def create_renderer(self) -> Renderer:
         return Renderer(self.map, self._render_width(),
                         self.fov, self.ray_count)
+
+    def create_gui(self) -> Gui:
+        return Gui(self.map, self._window_width(), self._window_height())
+
+    def setup_pathfinder(self):
+        self.map.pathfinder.leeway = self.player_width / 2
+        self.map.pathfinder.change_objects(self.map.objects)
+        self.map.pathfinder.build_graph()
 
 
 class Client:
@@ -101,6 +114,8 @@ class Client:
         self.map = self.config_loader.map
         self.renderer = self.config_loader.create_renderer()
         self.map.renderer = self.renderer
+        self.gui = self.config_loader.create_gui()
+        self.config_loader.setup_pathfinder()
 
         pygame.init()
         self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
@@ -113,6 +128,7 @@ class Client:
     def run(self):
         # start = time.time()
         i = 70
+        f = 1
         while True:
             # if time.time() - start > 20:
             #     pygame.quit()
@@ -132,6 +148,17 @@ class Client:
                 if event.type == pygame.MOUSEWHEEL:
                     i += event.y
                     i = max(1, i)
+            if len(self.map.enemies.sprites()):
+                if pygame.mouse.get_pressed()[1]:
+                    if f:
+                        self.map.enemies.sprites()[0].click = 1
+                        # game_map.enemies.sprites()[0].click %= 2
+                    else:
+                        self.map.enemies.sprites()[0].click = 0
+                    f = 0
+                else:
+                    f = 1
+                    self.map.enemies.sprites()[0].click = 0
             if self.map.all_objectives_met():
                 pygame.quit()
                 exit()
@@ -142,6 +169,7 @@ class Client:
                                         sprite.y + sprite.height / 2,
                                         sprite.orientation)
             self.renderer.render()
+            self.gui.draw_gui()
             self.map.draw()
             self.map.update()
             self.renderer.draw_rays()

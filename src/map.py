@@ -1,4 +1,5 @@
 import pygame
+from src.pathfinder import *
 
 
 class GameMap:
@@ -17,6 +18,7 @@ class GameMap:
         self.keys = pygame.key.get_pressed()
         self.renderer = None
         self.objectives = pygame.sprite.Group()
+        self.pathfinder = Pathfinder()
 
     def add_objective(self, obj):
         self.objectives.add(obj)
@@ -49,6 +51,9 @@ class GameMap:
 
     def remove_player(self, pla):
         self.player.remove(pla)
+
+    def update_pathfinder(self):
+        self.pathfinder.change_objects(self.objects)
 
     def update(self):
         self.keys = pygame.key.get_pressed()
