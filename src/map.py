@@ -54,6 +54,7 @@ class GameMap:
 
     def update_pathfinder(self):
         self.pathfinder.change_objects(self.objects)
+        self.pathfinder.build_graph()
 
     def update(self):
         self.keys = pygame.key.get_pressed()

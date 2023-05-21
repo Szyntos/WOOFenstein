@@ -98,8 +98,7 @@ class ConfigLoader:
 
     def setup_pathfinder(self):
         self.map.pathfinder.leeway = self.player_width / 2
-        self.map.pathfinder.change_objects(self.map.objects)
-        self.map.pathfinder.build_graph()
+        self.map.update_pathfinder()
 
 
 class Client:

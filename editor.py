@@ -44,7 +44,7 @@ class Editor:
         self.clock = pygame.time.Clock()
 
         pygame.display.set_caption("WOOFenstien")
-        pygame.event.set_grab(True)
+        # pygame.event.set_grab(True)
         pygame.mouse.set_visible(True)
 
         self.collection = EditorCollection(self.map, self.screen)

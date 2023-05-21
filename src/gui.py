@@ -1,4 +1,5 @@
 import pygame
+import time
 
 
 class Gui:
@@ -11,6 +12,7 @@ class Gui:
     def get_game_statistics(self):
         player_hp = self.game_map.player.sprite.health
         enemy_count = len(self.game_map.enemies.sprites())
+        time_passed = time.time()
 
     def draw_gui(self):
         self.game_map.screen.blit(self.gui, (0, 0))
