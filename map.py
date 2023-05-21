@@ -1,6 +1,7 @@
 from imports import *
 from utils import *
 from blocks import *
+from pathfinder import *
 from moveable import *
 
 
@@ -19,6 +20,7 @@ class GameMap:
         self.player = pygame.sprite.GroupSingle()
         self.keys = pygame.key.get_pressed()
         self.renderer = None
+        self.pathfinder = Pathfinder()
 
     def add_object(self, obj):
         self.objects.add(obj)
@@ -39,6 +41,9 @@ class GameMap:
 
     def add_player(self, pla):
         self.player = pygame.sprite.GroupSingle(pla)
+
+    def update_pathfinder(self):
+        self.pathfinder.change_objects(self.objects)
 
     def update(self):
         self.keys = pygame.key.get_pressed()

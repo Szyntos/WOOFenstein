@@ -1,3 +1,5 @@
+import math
+
 from imports import *
 from map import *
 from utils import *
@@ -186,12 +188,13 @@ class Renderer:
             j += 1
 
     def render(self):
+        h = -40
         if self.over:
             self.game_map.screen.blit(self.bg, (0, 0))
             return
         # draw the ceiling and the floor
-        self.game_map.screen.blit(self.ceil, (0, 0))
-        self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2))
+        self.game_map.screen.blit(self.ceil, (0, 0 + h))
+        self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2 + h))
 
         # 3D height scaling
         const = self.game_map.height * 50
@@ -204,7 +207,7 @@ class Renderer:
         dw = self.width3d / len(distances_normalised)
 
         c = (0, 0, 0, 255)
-        h = 0
+
         for i in range(len(distances_normalised)):
             for j in range(len(distances_normalised[i])):
                 if j == 0:
@@ -226,7 +229,7 @@ class Renderer:
                     sat = 1.5
                     cu = saturation(cu, sat)
                     cd = saturation(cd, sat)
-                    if not type(distances_normalised[i][j][1]) == Projectile:
+                    if not type(distances_normalised[i][j][1]) == Projectile or 1:
                         pygame.draw.rect(self.game_map.screen, pygame.Color(cu),
                                          pygame.Rect(self.width3d - (i + 1) * dw, self.game_map.height / 2 -
                                                      (const * (distances_normalised[i][j][0])) / 2 + h, dw + 1,

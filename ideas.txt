@@ -1,0 +1,4 @@
+granat - obszarowy dmg, bouncing tears
+
+stun gun - wyłącznenie pathfindingu
+

@@ -20,6 +20,21 @@ class GameObject(pygame.sprite.Sprite):
         self.color = (0, 0, 0, 0)
 
 
+class Border(GameObject):
+    def __init__(self, screen, game_map, width, height, x, y):
+        super().__init__(screen, game_map, width, height, x, y)
+        self.type = "opaque"
+        self.image = pygame.Surface((self.width_scaled, self.height_scaled))
+        self.color = hex_to_rgb("#3F3734") + [122]
+        # self.color = [168, 168, 168, 255]
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect(
+            topleft=(self.x_scaled, self.y_scaled))
+
+    def update(self):
+        pass
+
+
 class Box(GameObject):
     def __init__(self, screen, game_map, width, height, x, y):
         super().__init__(screen, game_map, width, height, x, y)

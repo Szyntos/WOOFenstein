@@ -1,5 +1,5 @@
 def distance_inverse(p1, p2):
-    # return distance_2(p1, p2)
+    # return distance_2(p1, p2)**(-1)
     a = ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
     if a == 0:
         return 0.00001 ** -0.5
@@ -38,6 +38,10 @@ def distance_2(p1, p2):
     if dx < dy:
         return (dx + dy - (dx >> 1)) * m
     return (dx + dy - (dy >> 1)) * m
+
+
+def vector_length(vec):
+    return (sum(i ** 2 for i in vec)) ** 0.5
 
 
 def angle_between_lines(edge_index, angle):
@@ -93,8 +97,7 @@ def same_direction(p, q):
     return 0
 
 
-def approx_equals(a, b):
-    eps = 0.0001
+def approx_equals(a, b, eps=0.0001):
     if b - eps < a < b + eps:
         return 1
     return 0
@@ -140,9 +143,9 @@ def saturation(c, sat):
 def DiamondAngle(y, x):
     # atan2 approximation, yields values form [0, 4]
     if y >= 0:
-        return y / (x + y) if x >= 0 else 1 - x / (-x + y)
+        return y / (x + y) if x >= 0 and (x + y) != 0 else 1 - x / (-x + y) if (-x + y) != 0 else 0
     else:
-        return 2 - y / (-x - y) if x < 0 else 3 + x / (x - y)
+        return 2 - y / (-x - y) if x < 0 and (x + y) != 0 else 3 + x / (x - y) if (-x + y) != 0 else 0
 
 
 def line_intersection(ray, edge):

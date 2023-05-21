@@ -1,5 +1,7 @@
+import pathfinder
+import utils
 from imports import *
-from map import *
+# from map import *
 from blocks import *
 
 
@@ -33,26 +35,25 @@ class Projectile(GameObject):
         return pygame.sprite.spritecollideany(self, self.game_map.enemies)
 
     def update(self):
-
-        if self.if_hit() or time.time() - self.birth_time > self.time_alive:
+        if self.if_hit() or time.time() - self.birth_time > self.time_alive or self.collision():
             self.game_map.remove_projectile(self)
         vec = self.vectors[0]
         self.x += vec[0] * self.speed
         self.x_scaled += vec[0] * self.speed_scaled
         self.rect.x = self.x_scaled
-        if self.collision():
-            self.x -= vec[0] * self.speed
-            self.x_scaled -= vec[0] * self.speed_scaled
-            self.rect.x = self.x_scaled
-            self.vectors[0][0] *= -1
+        # if self.collision():
+        #     self.x -= vec[0] * self.speed
+        #     self.x_scaled -= vec[0] * self.speed_scaled
+        #     self.rect.x = self.x_scaled
+        #     self.vectors[0][0] *= -1
         self.y += vec[1] * self.speed
         self.y_scaled += vec[1] * self.speed_scaled
         self.rect.y = self.y_scaled
-        if self.collision():
-            self.x -= vec[1] * self.speed
-            self.x_scaled -= vec[1] * self.speed_scaled
-            self.rect.x = self.x_scaled
-            self.vectors[0][1] *= -1
+        # if self.collision():
+        #     self.x -= vec[1] * self.speed
+        #     self.x_scaled -= vec[1] * self.speed_scaled
+        #     self.rect.x = self.x_scaled
+        #     self.vectors[0][1] *= -1
         pass
 
 
@@ -77,7 +78,14 @@ class Enemy(GameObject):
                         self.vectors_org]
         self.noise = PerlinNoise(octaves=3)
         self.n_i = random.random()
-        self.health = 4
+        self.health = 10
+        self.state = "idle"
+        self.path = [self.x, self.y]
+        self.path_state = 0
+        self.path_vector = [1, 0]
+        self.path_length = 0
+        self.click = 0
+        self.travelled_distance = 0
 
     def rotate_vectors(self, angle):
         self.vectors = [[(math.cos(-math.pi / 180 * angle) * x - math.sin(-math.pi / 180 * angle) * y),
@@ -90,23 +98,70 @@ class Enemy(GameObject):
     def is_shot(self):
         return pygame.sprite.spritecollideany(self, self.game_map.projectiles)
 
-    def move(self):
-        self.n_i += 0.003
-        angle = (self.noise([self.n_i, self.n_i]) * 360)
-        # print(angle)
-        self.rotate_vectors(angle)
-        vec = self.vectors[2]
+    def path_to_player(self):
+        # print(self.x, self.y,self.width / 2, self.game_map.player.sprite.x, self.game_map.player.sprite.y,
+        # self.game_map.player.sprite.width / 2, [self.x + self.width / 2, self.y + self.height / 2],
+        # [self.game_map.player.sprite.x + self.game_map.player.sprite.width / 2, self.game_map.player.sprite.y +
+        # self.game_map.player.sprite.height / 2])
+        return self.game_map.pathfinder.find_shortest([self.x + self.width / 2, self.y + self.height / 2],
+                                                      [self.game_map.player.sprite.x +
+                                                       self.game_map.player.sprite.width / 2,
+                                                       self.game_map.player.sprite.y +
+                                                       self.game_map.player.sprite.height / 2])
 
+    def switch_states(self):
+        if self.state == "idle":
+            self.path = self.path_to_player()
+            self.path_length = pathfinder.get_path_length(self.path)
+            # print(self.path_length)
+            self.path_state = 0
+            self.travelled_distance = 0
+            self.state = "attack"
+        else:
+            self.state = "idle"
+
+    def follow_path(self):
+        pathfinder.draw_path(self.path, self.game_map)
+        if self.travelled_distance - 100 > self.path_length:
+            self.switch_states()
+            return
+        # print(self.travelled_distance, self.path_length)
+        if (approx_equals(self.x + self.width / 2, self.path[self.path_state].x, 2) and
+                approx_equals(self.y + self.height / 2, self.path[self.path_state].y, 2)):
+            self.path_state += 1
+            if self.path_state == len(self.path):
+                self.switch_states()
+                return
+            self.path_vector = [self.path[self.path_state].x - self.x - self.width / 2,
+                                self.path[self.path_state].y - self.y - self.height / 2]
+            l = utils.vector_length(self.path_vector)
+            self.path_vector = [i / l for i in self.path_vector]
+
+    def move(self):
+        if self.state == "idle":
+            self.n_i += 0.003
+            angle = (self.noise([self.n_i, self.n_i]) * 360)
+            # print(angle)
+            self.rotate_vectors(angle)
+            vec = self.vectors[2]
+            # vec = [0, 0]
+        else:
+            self.follow_path()
+            vec = self.path_vector
+            # print(vec)
+            # print(self.path_to_player())
+        vector_moved = [0, 0]
         self.x += vec[0] * self.speed
+        vector_moved[0] += vec[0] * self.speed
         self.x_scaled += vec[0] * self.speed_scaled
         self.rect.x = self.x_scaled
         if self.collision():
             self.x -= vec[0] * self.speed
             self.x_scaled -= vec[0] * self.speed_scaled
-
             self.rect.x = self.x_scaled
             self.vectors_org[2][0] *= -1
         self.y += vec[1] * self.speed
+        vector_moved[1] += vec[1] * self.speed
         self.y_scaled += vec[1] * self.speed_scaled
         self.rect.y = self.y_scaled
         if self.collision():
@@ -114,9 +169,14 @@ class Enemy(GameObject):
             self.y_scaled -= vec[1] * self.speed_scaled
             self.rect.y = self.y_scaled
             self.vectors_org[2][1] *= -1
+        self.travelled_distance += utils.vector_length(vector_moved)
 
     def update(self):
+        if self.click:
+            self.switch_states()
+        # print(self.x, self.y)
         if self.is_shot():
+            self.switch_states()
             self.health -= 1
             self.color = [min(255, c + 50) for c in self.color]
             self.image.fill(self.color)
@@ -148,7 +208,7 @@ class Player(GameObject):
         self.image_rect = self.image.get_rect(topleft=(self.x_scaled, self.y_scaled))
         # Rect used for collision checking
         self.rect = self.image.get_rect(topleft=(self.x_scaled, self.y_scaled))
-
+        self.health = 10
         self.speed_walk = 2.5
         self.speed_sprint = 2 * self.speed_walk
         self.speed_crouch = 0.25 * self.speed_walk
@@ -193,11 +253,13 @@ class Player(GameObject):
         # Shoot
         if pygame.mouse.get_pressed()[0] or self.game_map.keys[pygame.K_UP]:
             self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
-                                                    5, 5, self.x-2.5, self.y-2.5, self.orientation, 5, 5))
+                                                    5, 5, self.x + self.width/2 - 2.5, self.y + self.height/2 - 2.5,
+                                                    self.orientation, 3, 10))
         elif pygame.mouse.get_pressed()[2] or self.game_map.keys[pygame.K_DOWN]:
             if not self.flag:
                 self.game_map.add_projectile(Projectile(self.game_map.screen, self.game_map,
-                                                        50, 50, self.x-25, self.y-25, self.orientation, 1, 20))
+                                                        50, 50, self.x + self.width/2 - 25, self.y + self.height/2 - 25,
+                                                        self.orientation, 1, 20))
             self.flag = 1
         else:
             self.flag = 0
@@ -288,6 +350,7 @@ class Player(GameObject):
         return pygame.sprite.spritecollideany(self, self.game_map.enemies)
 
     def update(self):
+        # print(self.x, self.y)
         if self.is_killed():
             if self.game_map.renderer:
                 self.game_map.renderer.over = 1
