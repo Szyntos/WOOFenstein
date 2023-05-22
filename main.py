@@ -124,6 +124,8 @@ class Client:
         self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
         self.clock = pygame.time.Clock()
 
+        self.mouse_sensitivity = 1
+
         pygame.display.set_caption("WOOFenstien")
         pygame.event.set_grab(True)
         pygame.mouse.set_visible(False)
@@ -148,7 +150,7 @@ class Client:
                         exit()
                 if event.type == pygame.MOUSEMOTION:
                     mouse_move = event.rel
-                    mouse_move = [10 * i for i in mouse_move]
+                    mouse_move = [self.mouse_sensitivity * i for i in mouse_move]
                 if event.type == pygame.MOUSEWHEEL:
                     i += event.y
                     i = max(1, i)

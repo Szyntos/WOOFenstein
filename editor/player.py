@@ -138,9 +138,9 @@ class EditorPlayer(GameObject):
 
     def to_dict(self):
         return {
-            "width": self.width,
-            "height": self.height,
-            "x": self.x,
-            "y": self.y,
+            "width": int(self.width/self.game_map.scale),
+            "height": int(self.height/self.game_map.scale),
+            "x": int(self.x/self.game_map.scale),
+            "y": int(self.y/self.game_map.scale),
             "type": self.type.name
         }

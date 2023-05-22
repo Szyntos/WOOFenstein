@@ -22,11 +22,11 @@ class ConfigLoader:
         self.height = config_data["map height"]
 
     def get_screen(self) -> pygame.Surface | pygame.SurfaceType:
-        mode = (self.width, self.height)
-        return pygame.display.set_mode(mode)
+        mode = (self.width*self.scale, self.height*self.scale)
+        return pygame.display.set_mode(mode, pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
 
     def create_map(self, screen: pygame.Surface | pygame.SurfaceType):
-        self.map = GameMap(screen, self.width, self.height, [0, 0], 1)
+        self.map = GameMap(screen, self.width, self.height, [0, 0], self.scale)
 
 
 class Editor:
