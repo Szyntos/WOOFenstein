@@ -4,10 +4,12 @@ from editor.player import EditorPlayer
 
 
 class EditorCollection:
-    def __init__(self, game_map, screen):
+    def __init__(self, game_map, screen, config_loader):
         self.editor_players = []
         self.game_map = game_map
         self.screen = screen
+        self.config_loader = config_loader
+        self.config_loader.load_config()
         self.current_index = None
 
     def check_type(self):
@@ -66,38 +68,38 @@ class EditorCollection:
         objects = [pla.to_dict() for pla in players if not pla.is_active]
         if not objects:
             objects = [{
-                    "width": 10,
-                    "height": 10,
-                    "x": 495,
-                    "y": 495,
+                    "width": self.config_loader.width/100,
+                    "height": self.config_loader.width/100,
+                    "x": self.config_loader.width/2 - self.config_loader.width/200,
+                    "y": self.config_loader.height/2 - self.config_loader.width/200,
                     "type": "Player"
                   }]
         objects = objects + [{
-                    "width": 1000.0,
-                    "height": 10,
+                    "width": self.config_loader.width,
+                    "height": self.config_loader.width/100,
                     "x": 0,
                     "y": 0,
                     "type": "Border"
                   },
                   {
-                    "width": 1000.0,
-                    "height": 10,
+                    "width": self.config_loader.width,
+                    "height": self.config_loader.width/100,
                     "x": 0,
-                    "y": 990,
+                    "y": self.config_loader.height - self.config_loader.width/100,
                     "type": "Box"
                   },
                   {
-                    "width": 10,
-                    "height": 980,
+                    "width": self.config_loader.width/100,
+                    "height": self.config_loader.height - 2*self.config_loader.width/100,
                     "x": 0,
-                    "y": 10,
+                    "y": self.config_loader.width/100,
                     "type": "Box"
                   },
                   {
-                    "width": 10,
-                    "height": 980,
-                    "x": 990,
-                    "y": 10,
+                    "width": self.config_loader.width/100,
+                    "height": self.config_loader.height - 2*self.config_loader.width/100,
+                    "x": self.config_loader.width - self.config_loader.width/100,
+                    "y": self.config_loader.width/100,
                     "type": "Box"
                   },
         ]

@@ -47,7 +47,7 @@ class Editor:
         # pygame.event.set_grab(True)
         pygame.mouse.set_visible(True)
 
-        self.collection = EditorCollection(self.map, self.screen)
+        self.collection = EditorCollection(self.map, self.screen, self.config_loader)
 
     def run(self):
         # start = time.time()
