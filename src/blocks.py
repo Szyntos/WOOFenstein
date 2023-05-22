@@ -70,8 +70,11 @@ class Door(GameObject):
         self.height_org = self.width
         self.tmp = time.time()
         self.closed = 1
-        self.open_hit_box = (GameObject(screen, game_map, width, height + 100, x, y-50) if self.width > self.height else
-                             GameObject(screen, game_map, width + 100, height, x-50, y))
+        self.open_size = 20 * self.game_map.scale
+        self.open_leeway = 400 * self.game_map.scale
+        self.open_hit_box = (GameObject(screen, game_map, width, height + self.open_leeway, x, y-self.open_leeway/2)
+                             if self.width > self.height else
+                             GameObject(screen, game_map, width + self.open_leeway, height, x-self.open_leeway/2, y))
 
     def update_shape(self):
         self.width_scaled = self.width * self.game_map.scale
@@ -83,13 +86,13 @@ class Door(GameObject):
 
     def open(self):
         if self.open_orientation == "horizontal" and self.closed:
-            if self.width > 20:
-                self.width = max(self.width - (self.width_org - 20) / self.time_to_open, 20)
+            if self.width > self.open_size:
+                self.width = max(self.width - (self.width_org - self.open_size) / self.time_to_open, self.open_size)
             else:
                 self.closed = 0
         elif self.open_orientation == "vertical" and self.closed:
-            if self.height > 20:
-                self.height = max(self.height - (self.height_org - 20) / self.time_to_open, 20)
+            if self.height > self.open_size:
+                self.height = max(self.height - (self.height_org - self.open_size) / self.time_to_open, self.open_size)
             else:
                 self.closed = 0
         self.update_shape()
@@ -97,12 +100,12 @@ class Door(GameObject):
     def close(self):
         if self.open_orientation == "horizontal" and not self.closed:
             if self.width < self.width_org:
-                self.width = min(self.width + (self.width_org - 20) / self.time_to_open, self.width_org)
+                self.width = min(self.width + (self.width_org - self.open_size) / self.time_to_open, self.width_org)
             else:
                 self.closed = 1
         elif self.open_orientation == "vertical" and not self.closed:
             if self.height < self.height_org:
-                self.height = min(self.height + (self.height_org - 20) / self.time_to_open, self.height_org)
+                self.height = min(self.height + (self.height_org - self.open_size) / self.time_to_open, self.height_org)
             else:
                 self.closed = 1
         self.update_shape()
@@ -113,6 +116,7 @@ class Door(GameObject):
     def update(self):
 
         if self.is_player_close():
+            self.closed = 1
             self.open()
         else:
             self.closed = 0

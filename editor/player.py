@@ -7,7 +7,7 @@ from src.utils import hex_to_rgb
 class BlockType:
     def __init__(self, block_type: str):
         self.name = block_type
-        self.types = ["Box", "RedBox", "Glass", "RedGlass", "Player", "Enemy", "Objective"]
+        self.types = ["Box", "RedBox", "Glass", "RedGlass", "Player", "Enemy", "Objective", "Door"]
 
     def get_color(self):
         match self.name:
@@ -25,6 +25,8 @@ class BlockType:
                 return [255, 140, 0]
             case "Enemy":
                 return [0, 0, 0]
+            case "Door":
+                return hex_to_rgb("#B67107") + [122]
             case "Objective":
                 return [230, 230, 250]
 

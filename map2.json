@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "width": 10,
+    "height": 10,
+    "x": 495,
+    "y": 495,
+    "type": "Player"
+  },
+  {
+    "width": 1000.0,
+    "height": 10,
+    "x": 0,
+    "y": 0,
+    "type": "Border"
+  },
+  {
+    "width": 1000.0,
+    "height": 10,
+    "x": 0,
+    "y": 990,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 980,
+    "x": 0,
+    "y": 10,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 980,
+    "x": 990,
+    "y": 10,
+    "type": "Box"
+  }
+]

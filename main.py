@@ -69,10 +69,10 @@ class ConfigLoader:
 
         block_constructors = get_block_constructors()
         for obj in objects:
-            width = obj["width"]
-            height = obj["height"]
-            x = obj["x"]
-            y = obj["y"]
+            width = obj["width"] * self.scale
+            height = obj["height"] * self.scale
+            x = obj["x"] * self.scale
+            y = obj["y"] * self.scale
             if obj["type"] == "Player":
                 player = Player(screen, self.map, width, height, x, y)
                 self.map.set_player(player)
@@ -103,10 +103,15 @@ class ConfigLoader:
 
 class Client:
     def __init__(self):
+        pygame.init()
+
         self.config_loader = ConfigLoader("config.json", "map.json")
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
+        # infoObject = pygame.display.Info()
+        # self.screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
+        # self.actual_screen = self.config_loader.get_screen()
 
         self.config_loader.create_map(self.screen)
         self.config_loader.populate_map(self.screen)
@@ -116,7 +121,6 @@ class Client:
         self.gui = self.config_loader.create_gui()
         self.config_loader.setup_pathfinder()
 
-        pygame.init()
         self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
         self.clock = pygame.time.Clock()
 
@@ -183,7 +187,7 @@ class Client:
             self.screen.blit(text, (10, 10))
 
             pygame.display.update()
-            self.clock.tick(60)
+            self.clock.tick(40)
 
 
 if __name__ == "__main__":

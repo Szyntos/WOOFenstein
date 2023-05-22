@@ -51,10 +51,15 @@ class Renderer:
         self.ceil.fill(self.ceil_color)
 
     def _init_floor(self):
-        self.floor = pygame.Surface((self.width3d, self.game_map.height / 2))
+        filename = "./img/floor.jpg"
+        self.floor = pygame.image.load(filename).convert()
+        self.floor = pygame.transform.scale(self.floor,
+                                            (self.width3d, self.game_map.height / 2))
+        self.floor.set_colorkey("BLACK")
+        # self.floor = pygame.Surface((self.width3d, self.game_map.height / 2))
         self.floor_color = utils.hex_to_rgb("#6d6a50")
         # self.floor_color = hex_to_rgb("#000000")
-        self.floor.fill(self.floor_color)
+        # self.floor.fill(self.floor_color)
 
     def __init__(self, game_map: GameMap, width3d: float, fov: float, ray_count: int):
         self.width3d = width3d
@@ -272,7 +277,7 @@ class Renderer:
         self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2 + h))
 
         # 3D height scaling
-        const = self.game_map.height * 50
+        const = self.game_map.height * 70
 
         distances_normalised = self._get_normalised_distances()
 
@@ -290,7 +295,7 @@ class Renderer:
                 b = 12 / (j + 4) * max(0, min(255, abs(distance[2]) / 360 * 255))
                 c = utils.combine_colors([220 - b, 220 - b, 220 - b, 60], c)
                 # Objects further away are darker
-                b = 12 / (j + 4) * max(0, min(255, abs(1 / distance[0]) ** 2 / 7000))
+                b = 12 / (j + 4) * max(0, min(255, abs(1 / distance[0]) ** 3 / 10000000))
                 c = [max(max(0, i - 70), i - b / 4) for i in c]
                 # Blending color with the floor and the ceiling
                 if distance[1].type == "semitransparent":

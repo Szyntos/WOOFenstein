@@ -13,11 +13,13 @@ def distance_inverse(p1: Point, p2: Point) -> float:
     return a ** -0.5
 
 
-def is_visible(point: Point, camera: Point, orient: float, fov: float) -> bool:
+def is_visible(point: Point, camera: Point, orient: float, fov: float, wall: bool = True) -> bool:
     # Check if the point is in the fov (actually if they are in front of the camera)
     vec = [point.x - camera.x, point.y - camera.y]
     a = ((DiamondAngle(vec[0], vec[1]) - 2) * 90) % 360
     acc = 5
+    if not wall:
+        return 10 - acc <= (a - orient + fov / 2 + 10) % 360 <= 180 - fov/2
     return 10 - acc <= (a - orient + fov / 2 + 10) % 360 <= 10 + 180 + acc
 
 

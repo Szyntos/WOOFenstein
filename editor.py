@@ -81,7 +81,8 @@ class Editor:
 
             # Show FPS
             fps = int(self.clock.get_fps())
-            text = self.font.render(str(fps), True, "black")
+            name = self.collection.get_current_player_name()
+            text = self.font.render(str(name), True, "white")
             self.screen.blit(text, (10, 10))
 
             pygame.display.update()

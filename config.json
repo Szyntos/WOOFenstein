@@ -1,7 +1,7 @@
 {
   "scale": 0.75,
-  "map width": 900,
-  "map height": 900,
+  "map width": 1000,
+  "map height": 1000,
   "ray count": 70,
   "fov": 110,
   "map scale": 0.4

@@ -5,7 +5,7 @@ from perlin_noise import PerlinNoise
 import pygame
 
 from src.blocks import GameObject
-from src.utils import hex_to_rgb, approx_equals, vector_length
+from src.utils import hex_to_rgb, approx_equals, vector_length, is_visible, Point
 from src.pathfinder import *
 
 
@@ -47,7 +47,6 @@ class Projectile(GameObject):
         return pygame.sprite.spritecollideany(self, self.game_map.enemies)
 
     def update(self):
-
         if self.is_hit() or time.time() - self.birth_time > self.time_alive or self.collision():
             self.game_map.remove_projectile(self)
         vec = self.vectors[0]
@@ -79,8 +78,12 @@ class Enemy(GameObject):
         self.image.fill(self.color)
         self.rect = self.image.get_rect(
             topleft=(self.x_scaled, self.y_scaled))
-        self.speed = 1.5
+        self.speed = 0.7
         self.speed_scaled = self.speed * self.game_map.scale
+        self.speed_idle = 0.7
+        self.speed_idle_scaled = self.speed_idle * self.game_map.scale
+        self.speed_attack = 2
+        self.speed_attack_scaled = self.speed_attack * self.game_map.scale
         self.vectors_org = [[0, -1], [0, 1], [-1, 0], [1, 0]]
         self.orientation = random.random() * 360
         self.vectors = rotate_vector(self.orientation, self.vectors_org)
@@ -89,6 +92,9 @@ class Enemy(GameObject):
         self.n_i = random.random()
         self.health = 10
         self.state = "idle"
+        self.dt = 1
+        self.time = 0
+        self.previous_state = "idle"
         self.path = [self.x, self.y]
         self.path_state = 0
         self.path_vector = [1, 0]
@@ -113,20 +119,31 @@ class Enemy(GameObject):
                                                        self.game_map.player.sprite.y +
                                                        self.game_map.player.sprite.height / 2])
 
+    def switch_to_attack(self):
+        self.path = self.path_to_player()
+        self.path_length = get_path_length(self.path)
+        # print(self.path_length)
+        self.path_state = 0
+        self.travelled_distance = 0
+        self.state = "attack"
+        self.speed = self.speed_attack
+        self.speed_scaled = self.speed_attack_scaled
+
+    def switch_to_idle(self):
+        self.state = "idle"
+        self.speed = self.speed_idle
+        self.speed_scaled = self.speed_idle_scaled
+
     def switch_states(self):
         if self.state == "idle":
-            self.path = self.path_to_player()
-            self.path_length = get_path_length(self.path)
-            # print(self.path_length)
-            self.path_state = 0
-            self.travelled_distance = 0
-            self.state = "attack"
+            self.switch_to_attack()
         else:
-            self.state = "idle"
+            self.switch_to_idle()
 
     def follow_path(self):
-        draw_path(self.path, self.game_map)
-        if self.travelled_distance - 100 > self.path_length:
+        # draw_path(self.path, self.game_map)
+        if self.travelled_distance - 100 * self.game_map.scale > self.path_length:
+            self.switch_states()
             self.switch_states()
             return
         # print(self.travelled_distance, self.path_length)
@@ -134,6 +151,7 @@ class Enemy(GameObject):
                 approx_equals(self.y + self.height / 2, self.path[self.path_state].y, 2)):
             self.path_state += 1
             if self.path_state == len(self.path):
+                self.switch_states()
                 self.switch_states()
                 return
             self.path_vector = [self.path[self.path_state].x - self.x - self.width / 2,
@@ -143,7 +161,7 @@ class Enemy(GameObject):
 
     def move(self):
         if self.state == "idle":
-            self.n_i += 0.003
+            self.n_i += 0.001
             angle = (self.noise([self.n_i, self.n_i]) * 360)
             # print(angle)
             self.vectors = rotate_vector(angle, self.vectors_org)
@@ -180,6 +198,21 @@ class Enemy(GameObject):
     def update(self):
         if self.click:
             self.switch_states()
+        if is_visible(Point(self.x, self.y), Point(self.game_map.player.sprite.x +
+                                                   self.game_map.player.sprite.width / 2,
+                                                   self.game_map.player.sprite.y +
+                                                   self.game_map.player.sprite.height / 2),
+                      self.game_map.player.sprite.orientation, self.game_map.renderer.fov, False):
+            self.switch_to_idle()
+            self.previous_state = "idle"
+        else:
+            if self.previous_state == "idle":
+                self.time = time.time()
+                self.switch_to_attack()
+            if time.time() - self.time > self.dt:
+                self.switch_to_attack()
+                self.time = time.time()
+            self.previous_state = "attack"
         if self.is_shot():
             self.switch_states()
             self.health -= 1

@@ -19,6 +19,11 @@ class EditorCollection:
         if self.current_index is not None:
             return self.editor_players[self.current_index]
 
+    def get_current_player_name(self):
+        if self.current_index is not None:
+            return self.editor_players[self.current_index].type.name
+        return ""
+
     def new_player(self, x, y):
         self.save_current_player()
         player = EditorPlayer(self.screen, self.game_map, x, y)
@@ -59,5 +64,42 @@ class EditorCollection:
     def to_json(self, filename):
         players = self.editor_players
         objects = [pla.to_dict() for pla in players if not pla.is_active]
+        if not objects:
+            objects = [{
+                    "width": 10,
+                    "height": 10,
+                    "x": 495,
+                    "y": 495,
+                    "type": "Player"
+                  }]
+        objects = objects + [{
+                    "width": 1000.0,
+                    "height": 10,
+                    "x": 0,
+                    "y": 0,
+                    "type": "Border"
+                  },
+                  {
+                    "width": 1000.0,
+                    "height": 10,
+                    "x": 0,
+                    "y": 990,
+                    "type": "Box"
+                  },
+                  {
+                    "width": 10,
+                    "height": 980,
+                    "x": 0,
+                    "y": 10,
+                    "type": "Box"
+                  },
+                  {
+                    "width": 10,
+                    "height": 980,
+                    "x": 990,
+                    "y": 10,
+                    "type": "Box"
+                  },
+        ]
         with open(filename, "w") as f:
             json.dump(objects, f, indent=2)
