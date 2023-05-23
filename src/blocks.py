@@ -67,7 +67,7 @@ class Door(GameObject):
         self.time_to_open = 20
         self.open_orientation = "horizontal" if self.width > self.height else "vertical"
         self.width_org = self.width
-        self.height_org = self.width
+        self.height_org = self.height
         self.tmp = time.time()
         self.closed = 1
         self.open_size = 20 * self.game_map.scale

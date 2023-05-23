@@ -1,0 +1,499 @@
+[
+  {
+    "width": 875,
+    "height": 10,
+    "x": -3,
+    "y": 152,
+    "type": "RedBox"
+  },
+  {
+    "width": 995,
+    "height": 10,
+    "x": 76,
+    "y": 857,
+    "type": "RedBox"
+  },
+  {
+    "width": 252,
+    "height": 10,
+    "x": -12,
+    "y": 685,
+    "type": "Box"
+  },
+  {
+    "width": 224,
+    "height": 10,
+    "x": 75,
+    "y": 797,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 47,
+    "x": 74,
+    "y": 755,
+    "type": "Box"
+  },
+  {
+    "width": 104,
+    "height": 10,
+    "x": 75,
+    "y": 752,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 58,
+    "x": 302,
+    "y": 683,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 10,
+    "height": 115,
+    "x": 422,
+    "y": 690,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 75,
+    "height": 10,
+    "x": 424,
+    "y": 688,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 10,
+    "height": 52,
+    "x": 495,
+    "y": 683,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 10,
+    "height": 58,
+    "x": 582,
+    "y": 807,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 64,
+    "height": 10,
+    "x": 525,
+    "y": 807,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 10,
+    "height": 52,
+    "x": 585,
+    "y": 683,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 155,
+    "height": 10,
+    "x": 589,
+    "y": 685,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 10,
+    "height": 161,
+    "x": 737,
+    "y": 532,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 10,
+    "height": 58,
+    "x": 688,
+    "y": 742,
+    "type": "Box"
+  },
+  {
+    "width": 58,
+    "height": 10,
+    "x": 690,
+    "y": 795,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 64,
+    "x": 747,
+    "y": 738,
+    "type": "Box"
+  },
+  {
+    "width": 264,
+    "height": 10,
+    "x": 750,
+    "y": 737,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 64,
+    "x": 890,
+    "y": 797,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 155,
+    "x": 890,
+    "y": 530,
+    "type": "Glass"
+  },
+  {
+    "width": 127,
+    "height": 10,
+    "x": 890,
+    "y": 532,
+    "type": "Glass"
+  },
+  {
+    "width": 155,
+    "height": 10,
+    "x": 80,
+    "y": 615,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 64,
+    "x": 304,
+    "y": 556,
+    "type": "Box"
+  },
+  {
+    "width": 201,
+    "height": 10,
+    "x": 232,
+    "y": 552,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 161,
+    "x": 427,
+    "y": 464,
+    "type": "RedGlass"
+  },
+  {
+    "width": 75,
+    "height": 10,
+    "x": 427,
+    "y": 617,
+    "type": "RedGlass"
+  },
+  {
+    "width": 92,
+    "height": 10,
+    "x": 502,
+    "y": 552,
+    "type": "RedGlass"
+  },
+  {
+    "width": 87,
+    "height": 10,
+    "x": 584,
+    "y": 622,
+    "type": "RedGlass"
+  },
+  {
+    "width": 10,
+    "height": 155,
+    "x": 662,
+    "y": 472,
+    "type": "RedGlass"
+  },
+  {
+    "width": 10,
+    "height": 155,
+    "x": 79,
+    "y": 464,
+    "type": "RedGlass"
+  },
+  {
+    "width": 218,
+    "height": 10,
+    "x": 81,
+    "y": 464,
+    "type": "RedGlass"
+  },
+  {
+    "width": 10,
+    "height": 81,
+    "x": 157,
+    "y": 388,
+    "type": "Box"
+  },
+  {
+    "width": 92,
+    "height": 10,
+    "x": 75,
+    "y": 389,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 155,
+    "x": 73,
+    "y": 235,
+    "type": "Box"
+  },
+  {
+    "width": 81,
+    "height": 10,
+    "x": -6,
+    "y": 235,
+    "type": "RedGlass"
+  },
+  {
+    "width": 10,
+    "height": 155,
+    "x": 590,
+    "y": 407,
+    "type": "Box"
+  },
+  {
+    "width": 81,
+    "height": 10,
+    "x": 427,
+    "y": 465,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 161,
+    "x": 503,
+    "y": 312,
+    "type": "RedGlass"
+  },
+  {
+    "width": 315,
+    "height": 10,
+    "x": 590,
+    "y": 404,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 98,
+    "x": 898,
+    "y": 311,
+    "type": "Box"
+  },
+  {
+    "width": 127,
+    "height": 10,
+    "x": 896,
+    "y": 313,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 75,
+    "x": 738,
+    "y": 402,
+    "type": "Glass"
+  },
+  {
+    "width": 150,
+    "height": 10,
+    "x": 737,
+    "y": 471,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 92,
+    "x": 665,
+    "y": 316,
+    "type": "Glass"
+  },
+  {
+    "width": 247,
+    "height": 10,
+    "x": 505,
+    "y": 311,
+    "type": "Glass"
+  },
+  {
+    "width": 241,
+    "height": 10,
+    "x": 665,
+    "y": 230,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 87,
+    "x": 666,
+    "y": 151,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 75,
+    "x": 580,
+    "y": 240,
+    "type": "Glass"
+  },
+  {
+    "width": 201,
+    "height": 10,
+    "x": 310,
+    "y": 385,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 81,
+    "x": 309,
+    "y": 311,
+    "type": "Glass"
+  },
+  {
+    "width": 144,
+    "height": 10,
+    "x": 167,
+    "y": 311,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 81,
+    "x": 170,
+    "y": 234,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 81,
+    "x": 311,
+    "y": 154,
+    "type": "Glass"
+  },
+  {
+    "width": 92,
+    "height": 10,
+    "x": 307,
+    "y": 226,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 75,
+    "x": 394,
+    "y": 227,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 81,
+    "x": 504,
+    "y": 152,
+    "type": "Glass"
+  },
+  {
+    "width": 150,
+    "height": 10,
+    "x": 750,
+    "y": 310,
+    "type": "Door"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 29,
+    "y": 884,
+    "type": "Player"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 60,
+    "y": 484,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 60,
+    "y": 484,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 600,
+    "y": 484,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 600,
+    "y": 484,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 600,
+    "y": 300,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 600,
+    "y": 300,
+    "type": "Enemy"
+  },
+  {
+    "width": 20,
+    "height": 20,
+    "x": 800,
+    "y": 350,
+    "type": "Objective"
+  },
+  {
+    "width": 20,
+    "height": 20,
+    "x": 20,
+    "y": 24,
+    "type": "Objective"
+  },
+  {
+    "width": 1000,
+    "height": 10.0,
+    "x": 0,
+    "y": 0,
+    "type": "Border"
+  },
+  {
+    "width": 1000,
+    "height": 10.0,
+    "x": 0,
+    "y": 990.0,
+    "type": "Box"
+  },
+  {
+    "width": 10.0,
+    "height": 980.0,
+    "x": 0,
+    "y": 10.0,
+    "type": "Box"
+  },
+  {
+    "width": 10.0,
+    "height": 980.0,
+    "x": 990.0,
+    "y": 10.0,
+    "type": "Box"
+  }
+]
