@@ -60,6 +60,6 @@ class Pathfinder:
         self.visibilityGraph.build(self.objects)
 
     def find_shortest(self, a, b):
-        a = vg.Point(int(a[0]),int(a[1]))
+        a = vg.Point(int(a[0]), int(a[1]))
         b = vg.Point(int(b[0]), int(b[1]))
         return self.visibilityGraph.shortest_path(a, b)

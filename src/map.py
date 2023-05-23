@@ -17,6 +17,7 @@ class GameMap:
         self.player = pygame.sprite.GroupSingle()
         self.keys = pygame.key.get_pressed()
         self.renderer = None
+        self.state = "playing"
         self.objectives = pygame.sprite.Group()
         self.pathfinder = Pathfinder()
 

@@ -124,7 +124,7 @@ class Client:
         self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
         self.clock = pygame.time.Clock()
 
-        self.mouse_sensitivity = 1
+        self.mouse_sensitivity = 1.5
 
         pygame.display.set_caption("WOOFenstien")
         pygame.event.set_grab(True)
@@ -166,19 +166,23 @@ class Client:
                     f = 1
                     self.map.enemies.sprites()[0].click = 0
             if self.map.all_objectives_met():
-                pygame.quit()
-                exit()
+                self.map.state = "won"
             # renderer.set_ray_count(i)
             sprite = self.map.player.sprite
             sprite.rotate_mouse(mouse_move)
             self.renderer.generate_rays(sprite.x + sprite.width / 2,
                                         sprite.y + sprite.height / 2,
                                         sprite.orientation)
-            self.renderer.render()
-            self.gui.draw_gui()
-            self.map.draw()
-            self.map.update()
-            self.renderer.draw_rays()
+            if self.map.state == "playing":
+                self.renderer.render()
+                self.gui.draw_gui()
+                self.map.draw()
+                self.map.update()
+                self.renderer.draw_rays()
+            elif self.map.state == "over":
+                self.gui.draw_game_over()
+            else:
+                self.gui.draw_won()
             # self.renderer.draw_visible_edges(sprite.x + sprite.width / 2,
             #                             sprite.y + sprite.height / 2,
             #                             sprite.orientation)

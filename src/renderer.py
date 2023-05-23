@@ -269,9 +269,6 @@ class Renderer:
 
     def render(self):
         h = -40
-        if self.over:
-            self.game_map.screen.blit(self.bg, (0, 0))
-            return
         # draw the ceiling and the floor
         self.game_map.screen.blit(self.ceil, (0, 0 + h))
         self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2 + h))

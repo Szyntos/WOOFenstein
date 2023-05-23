@@ -1,0 +1,170 @@
+[
+  {
+    "width": 1000.0,
+    "height": 10,
+    "x": 0,
+    "y": 0,
+    "type": "Border"
+  },
+  {
+    "width": 1000.0,
+    "height": 10,
+    "x": 0,
+    "y": 990,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 980,
+    "x": 0,
+    "y": 10,
+    "type": "RedBox"
+  },
+  {
+    "width": 10,
+    "height": 980,
+    "x": 990,
+    "y": 10,
+    "type": "Box"
+  },
+  {
+    "width": 150,
+    "height": 10,
+    "x": 150,
+    "y": 150,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 75,
+    "x": 450,
+    "y": 150,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 450,
+    "y": 450,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 150,
+    "x": 300,
+    "y": 150,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 150,
+    "height": 150,
+    "x": 75,
+    "y": 520,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 150,
+    "height": 10,
+    "x": 520,
+    "y": 520,
+    "type": "Glass"
+  },
+  {
+    "width": 10,
+    "height": 112,
+    "x": 600,
+    "y": 575,
+    "type": "Box"
+  },
+  {
+    "width": 10,
+    "height": 150,
+    "x": 220,
+    "y": 175,
+    "type": "RedGlass"
+  },
+  {
+    "width": 3,
+    "height": 150,
+    "x": 820,
+    "y": 150,
+    "type": "Glass"
+  },
+  {
+    "width": 3,
+    "height": 150,
+    "x": 810.0,
+    "y": 150,
+    "type": "GreenGlass"
+  },
+  {
+    "width": 3,
+    "height": 150,
+    "x": 800,
+    "y": 150,
+    "type": "RedGlass"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 750,
+    "y": 500,
+    "type": "Objective"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 520,
+    "y": 300,
+    "type": "Objective"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 500,
+    "y": 500,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 500,
+    "y": 500,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 500,
+    "y": 500,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 500,
+    "y": 500,
+    "type": "Enemy"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 500,
+    "y": 500,
+    "type": "Enemy"
+  },
+  {
+    "width": 150,
+    "height": 10,
+    "x": 610,
+    "y": 600,
+    "type": "Door"
+  },
+  {
+    "width": 10,
+    "height": 10,
+    "x": 490,
+    "y": 800,
+    "type": "Player"
+  }
+]

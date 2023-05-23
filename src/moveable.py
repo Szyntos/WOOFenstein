@@ -396,7 +396,7 @@ class Player(GameObject):
     def update(self):
         if self.is_killed():
             if self.game_map.renderer:
-                self.game_map.renderer.over = 1
+                self.game_map.state = "over"
         self.player_input()
 
     def draw(self):
