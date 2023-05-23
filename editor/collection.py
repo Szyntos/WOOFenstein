@@ -1,6 +1,6 @@
 import json
 
-from editor.player import EditorPlayer
+from WOOFenstein.editor import EditorPlayer
 
 
 class EditorCollection:
@@ -76,30 +76,30 @@ class EditorCollection:
         border = [
             {
                 "width": width,
-                "height": width / 100,
+                "height": width / 50,
                 "x": 0,
                 "y": 0,
                 "type": "Border"
              },
             {
                 "width": width,
-                "height": width / 100,
+                "height": width / 50,
                 "x": 0,
-                "y": height - width / 100,
+                "y": height - width / 50,
                 "type": "Box"
             },
             {
-                "width": width / 100,
-                "height": height - 2 * width / 100,
+                "width": width / 50,
+                "height": height - 2 * width / 50,
                 "x": 0,
-                "y": width / 100,
+                "y": width / 50,
                 "type": "Box"
             },
             {
-                "width": width / 100,
-                "height": height - 2 * width / 100,
-                "x": width - width / 100,
-                "y": width / 100,
+                "width": width / 50,
+                "height": height - 2 * width / 50,
+                "x": width - width / 50,
+                "y": width / 50,
                 "type": "Box"
             },
             ]

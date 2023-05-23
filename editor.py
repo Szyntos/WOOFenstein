@@ -1,8 +1,7 @@
 import pygame
 import json
 
-from editor.collection import EditorCollection
-from editor.player import EditorPlayer
+from WOOFenstein.editor import EditorCollection
 from src.map import GameMap
 
 
@@ -47,8 +46,8 @@ class ConfigLoader:
 
 
 class Editor:
-    def __init__(self):
-        self.config_loader = ConfigLoader("config.json", "map2.json")
+    def __init__(self, map_file):
+        self.config_loader = ConfigLoader("config.json", map_file)
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
@@ -66,8 +65,6 @@ class Editor:
         pygame.display.set_caption("WOOFenstien")
         # pygame.event.set_grab(True)
         pygame.mouse.set_visible(True)
-
-
 
     def check_events(self):
         for event in pygame.event.get():
@@ -111,5 +108,5 @@ class Editor:
 
 
 if __name__ == "__main__":
-    editor = Editor()
+    editor = Editor("map2.json")
     editor.run()

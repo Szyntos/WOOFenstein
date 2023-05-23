@@ -1,6 +1,7 @@
 from sys import exit
 import pygame
 import json
+import sys
 
 from src.objectives import Objective
 from src.blocks import get_block_constructors
@@ -104,10 +105,10 @@ class ConfigLoader:
 
 
 class Client:
-    def __init__(self):
+    def __init__(self, map_file):
         pygame.init()
 
-        self.config_loader = ConfigLoader("config.json", "map2.json")
+        self.config_loader = ConfigLoader("config.json", map_file)
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
@@ -218,5 +219,5 @@ class Client:
 
 
 if __name__ == "__main__":
-    client = Client()
+    client = Client("map2.json")
     client.run()

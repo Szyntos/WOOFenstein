@@ -5,7 +5,6 @@ from shapely import unary_union
 import src.utils
 from src.blocks import Border
 import pygame
-import math
 
 
 def draw_path(path, game_map):
@@ -63,6 +62,6 @@ class Pathfinder:
         self.visibilityGraph.build(self.objects)
 
     def find_shortest(self, a, b):
-        a = vg.Point(int(a[0]), int(a[1]))
-        b = vg.Point(int(b[0]), int(b[1]))
+        a = vg.Point(a[0], a[1])
+        b = vg.Point(b[0], b[1])
         return self.visibilityGraph.shortest_path(a, b)
