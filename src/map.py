@@ -1,5 +1,5 @@
 import pygame
-from src.pathfinder import *
+from src.pathfinder import Pathfinder
 
 
 class GameMap:

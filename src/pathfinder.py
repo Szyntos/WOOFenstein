@@ -9,21 +9,24 @@ import math
 
 
 def draw_path(path, game_map):
+    scale = game_map.scale
+    vector = game_map.vector
     for i in range(len(path) - 1):
         pygame.draw.line(game_map.screen, "#000000",
-                         [path[i].x * game_map.scale + game_map.vector[0],
-                          path[i].y * game_map.scale + game_map.vector[1]],
-                         [path[i + 1].x * game_map.scale + game_map.vector[0],
-                          path[i + 1].y * game_map.scale + game_map.vector[1]], 1)
+                         [path[i].x * scale + vector[0],
+                          path[i].y * scale + vector[1]],
+                         [path[i + 1].x * scale + vector[0],
+                          path[i + 1].y * scale + vector[1]], 1)
 
 
 def get_path_length(path):
     if len(path) < 2:
         return 0
-    l = 0
+    length = 0
     for i in range(len(path) - 1):
-        l += src.utils.vector_length([path[i].x - path[i + 1].x, path[i].y - path[i + 1].y])
-    return l
+        vector = [path[i].x - path[i + 1].x, path[i].y - path[i + 1].y]
+        length += src.utils.vector_length(vector)
+    return length
 
 
 class Pathfinder:
@@ -60,6 +63,6 @@ class Pathfinder:
         self.visibilityGraph.build(self.objects)
 
     def find_shortest(self, a, b):
-        a = vg.Point(int(a[0]), int(a[1]))
-        b = vg.Point(int(b[0]), int(b[1]))
+        a = vg.Point((a[0]), (a[1]))
+        b = vg.Point((b[0]), (b[1]))
         return self.visibilityGraph.shortest_path(a, b)

@@ -114,7 +114,6 @@ class Door(GameObject):
         return pygame.sprite.spritecollide(self.open_hit_box, self.game_map.player, False)
 
     def update(self):
-
         if self.is_player_close():
             self.closed = 1
             self.open()

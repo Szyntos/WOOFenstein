@@ -43,10 +43,10 @@ class BlockType:
 
 
 class EditorPlayer(GameObject):
-    def __init__(self, screen, game_map, x, y, width=5, height=5, block_type="Glass"):
+    def __init__(self, screen, game_map, x, y, width=5, height=5, block_type="Box", is_active=True):
         super().__init__(screen, game_map, width, height, x, y)
 
-        self.is_active = True
+        self.is_active = is_active
 
         self.type = BlockType(block_type)
         self.color = self.type.get_color()
@@ -58,7 +58,7 @@ class EditorPlayer(GameObject):
 
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
-        self.speed = 2.5
+        self.speed = 2
         self.vectors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
 
         self.resize_speed = 4
