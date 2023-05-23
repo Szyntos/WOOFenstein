@@ -274,7 +274,7 @@ class Renderer:
         self.game_map.screen.blit(self.floor, (0, self.game_map.height / 2 + h))
 
         # 3D height scaling
-        const = self.game_map.height * 70
+        const = self.game_map.height * 50
 
         distances_normalised = self._get_normalised_distances()
 

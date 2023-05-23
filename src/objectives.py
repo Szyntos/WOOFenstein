@@ -1,6 +1,7 @@
 import pygame
 
 from src.blocks import GameObject
+from src.utils import hex_to_rgb
 
 
 class Objective(GameObject):
@@ -8,7 +9,7 @@ class Objective(GameObject):
         super().__init__(screen, game_map, width, height, x, y)
         self.type = "objective"
         self.image = pygame.Surface((self.width_scaled, self.height_scaled))
-        self.color = [230, 230, 250, 255]
+        self.color = hex_to_rgb("#EBC7E6") + [255]
 
         self.image.fill(self.color)
         self.rect = self.image.get_rect(
