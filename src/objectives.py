@@ -21,12 +21,12 @@ class Objective(GameObject):
         self.t = 0
 
     def if_passed(self):
-        return pygame.sprite.spritecollideany(self, self.game_map.player)
+        return pygame.sprite.spritecollideany(self, self.game_map.player) or self.passed
 
     def update(self):
 
         if self.if_passed():
-            self.color = [50, 205, 50, 255]
+            self.color = [50, 100, 50, 255]
             self.passed = True
         else:
             self.t += 0.02

@@ -107,7 +107,7 @@ class Client:
     def __init__(self):
         pygame.init()
 
-        self.config_loader = ConfigLoader("config.json", "map2.json")
+        self.config_loader = ConfigLoader("config.json", "map.json")
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
