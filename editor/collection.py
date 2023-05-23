@@ -26,9 +26,15 @@ class EditorCollection:
             return self.editor_players[self.current_index].type.name
         return ""
 
-    def new_player(self, x, y):
+    # def insert_players(self, players):
+    #     for player in players:
+    #         self.game_map.add_object(player)
+    #         self.editor_players.append(player)
+
+    def new_player(self, x, y, width=5, height=5, block_type="Box"):
         self.save_current_player()
-        player = EditorPlayer(self.screen, self.game_map, x, y)
+        player = EditorPlayer(self.screen, self.game_map, x, y,
+                              width, height, block_type)
         self.game_map.set_player(player)
         self.current_index = len(self.editor_players)
         self.editor_players.append(player)
@@ -63,45 +69,61 @@ class EditorCollection:
                 return
         self.new_player(mouse[0], mouse[1])
 
+    def insert_border(self, objects):
+        width = self.config_loader.width
+        height = self.config_loader.height
+
+        border = [
+            {
+                "width": width,
+                "height": width / 100,
+                "x": 0,
+                "y": 0,
+                "type": "Border"
+             },
+            {
+                "width": width,
+                "height": width / 100,
+                "x": 0,
+                "y": height - width / 100,
+                "type": "Box"
+            },
+            {
+                "width": width / 100,
+                "height": height - 2 * width / 100,
+                "x": 0,
+                "y": width / 100,
+                "type": "Box"
+            },
+            {
+                "width": width / 100,
+                "height": height - 2 * width / 100,
+                "x": width - width / 100,
+                "y": width / 100,
+                "type": "Box"
+            },
+            ]
+
+        objects.extend(border)
+
+    def player_zero(self, objects):
+        width = self.config_loader.width
+        height = self.config_loader.height
+
+        player = {"width": width / 100,
+                  "height": width / 100,
+                  "x": width / 2 - width / 200,
+                  "y": height / 2 - width / 200,
+                  "type": "Player"}
+
+        objects.append(player)
+
     def to_json(self, filename):
         players = self.editor_players
         objects = [pla.to_dict() for pla in players if not pla.is_active]
         if not objects:
-            objects = [{
-                    "width": self.config_loader.width/100,
-                    "height": self.config_loader.width/100,
-                    "x": self.config_loader.width/2 - self.config_loader.width/200,
-                    "y": self.config_loader.height/2 - self.config_loader.width/200,
-                    "type": "Player"
-                  }]
-        objects = objects + [{
-                    "width": self.config_loader.width,
-                    "height": self.config_loader.width/100,
-                    "x": 0,
-                    "y": 0,
-                    "type": "Border"
-                  },
-                  {
-                    "width": self.config_loader.width,
-                    "height": self.config_loader.width/100,
-                    "x": 0,
-                    "y": self.config_loader.height - self.config_loader.width/100,
-                    "type": "Box"
-                  },
-                  {
-                    "width": self.config_loader.width/100,
-                    "height": self.config_loader.height - 2*self.config_loader.width/100,
-                    "x": 0,
-                    "y": self.config_loader.width/100,
-                    "type": "Box"
-                  },
-                  {
-                    "width": self.config_loader.width/100,
-                    "height": self.config_loader.height - 2*self.config_loader.width/100,
-                    "x": self.config_loader.width - self.config_loader.width/100,
-                    "y": self.config_loader.width/100,
-                    "type": "Box"
-                  },
-        ]
+            objects = []
+        self.insert_border(objects)
+
         with open(filename, "w") as f:
             json.dump(objects, f, indent=2)

@@ -20,7 +20,7 @@ class Objective(GameObject):
 
     def update(self):
         if self.if_passed():
-            self.color = [50,205,50, 255]
+            self.color = [50, 205, 50, 255]
             self.image = pygame.Surface((self.width_scaled, self.height_scaled))
             self.image.fill(self.color)
             self.passed = True

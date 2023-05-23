@@ -234,23 +234,21 @@ class Player(GameObject):
                 self.rotate(self.orientation)
             self.orientation = self.orientation % 360
 
+    def _initial_image(self, filename):
+        image = pygame.Surface((self.width_scaled, self.height_scaled))
+        image.fill((255, 255, 255))
+        image = pygame.image.load(filename).convert()
+        image = pygame.transform.scale(image, (self.width_scaled, self.height_scaled))
+        image.set_colorkey("BLACK")
+        return image
+
     def __init__(self, screen, game_map, width, height, x, y, initial_orientation=0):
         super().__init__(screen, game_map, width, height, x, y)
         filename = "./img/P_2.png"
         # Original image, used to rotate the sprite
-        self.org = pygame.Surface((self.width_scaled, self.height_scaled))
-        self.org.fill((255, 255, 255))
-        self.org = pygame.image.load(filename).convert()
-        self.org = pygame.transform.scale(self.org,
-                                          (self.width_scaled, self.height_scaled))
-        self.org.set_colorkey("BLACK")
+        self.org = self._initial_image(filename)
         # Actual image drawn to the screen
-        self.image = pygame.Surface((self.width_scaled, self.height_scaled))
-        self.image.fill((255, 255, 255))
-        self.image = pygame.image.load(filename).convert()
-        self.image = pygame.transform.scale(self.image,
-                                            (self.width_scaled, self.height_scaled))
-        self.image.set_colorkey("BLACK")
+        self.image = self._initial_image(filename)
         # Rect used for drawing the rotated image to the screen
         self.image_rect = self.image.get_rect(topleft=(self.x_scaled, self.y_scaled))
         # Rect used for collision checking
@@ -275,6 +273,7 @@ class Player(GameObject):
         self.vectors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
         self.flag = 0
 
+        self.orientation = 0
         self._set_initial_orientation(initial_orientation)
 
     def move_vector(self, vec):

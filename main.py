@@ -34,33 +34,34 @@ class ConfigLoader:
         self.ray_count = config_data["ray count"]
         self.fov = config_data["fov"]
         self.map_scale = config_data["map scale"]
-        self._scale_map_attributes()
+
+    def _map_width_scaled(self):
+        return self.map_width * self.scale
+
+    def _map_height_scaled(self):
+        return self.map_height * self.scale
 
     def _render_width(self):
-        return 2 * self.map_width
+        return 2 * self._map_width_scaled()
 
     def _render_height(self):
-        return self.map_height
+        return self._map_height_scaled()
 
     def _window_width(self):
-        return 0 * self.map_width + self._render_width()
+        return 0 * self._map_width_scaled() + self._render_width()
 
     def _window_height(self):
-        return max(self._render_height(), self.map_height)
-
-    def _scale_map_attributes(self):
-        self.map_height *= self.scale
-        self.map_width *= self.scale
+        return max(self._render_height(), self._map_height_scaled())
 
     def _get_vector(self):
-        return [self._render_width() - self.map_width * self.map_scale, 0]
+        return [self._render_width() - self._map_width_scaled() * self.map_scale, 0]
 
     def get_screen(self) -> pygame.Surface | pygame.SurfaceType:
         mode = (self._window_width(), self._window_height())
         return pygame.display.set_mode(mode)
 
     def create_map(self, screen: pygame.Surface | pygame.SurfaceType):
-        self.map = GameMap(screen, self.map_width, self.map_height,
+        self.map = GameMap(screen, self._map_width_scaled(), self._map_height_scaled(),
                            self._get_vector(), self.map_scale)
 
     def populate_map(self, screen: pygame.Surface | pygame.SurfaceType):
@@ -94,7 +95,8 @@ class ConfigLoader:
                         self.fov, self.ray_count)
 
     def create_gui(self) -> Gui:
-        return Gui(self.map, self._window_width(), self._window_height())
+        return Gui(self.map, self._window_width(), self._window_height(),
+                   self.scale, self.map_width, self.map_height)
 
     def setup_pathfinder(self):
         self.map.pathfinder.leeway = self.player_width / 2
@@ -105,7 +107,7 @@ class Client:
     def __init__(self):
         pygame.init()
 
-        self.config_loader = ConfigLoader("config.json", "map.json")
+        self.config_loader = ConfigLoader("config.json", "map2.json")
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
@@ -130,67 +132,86 @@ class Client:
         pygame.event.set_grab(True)
         pygame.mouse.set_visible(False)
 
+    def check_events(self, mouse_move, debug_var):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    exit()
+            if event.type == pygame.MOUSEMOTION:
+                mouse_move[0] = self.mouse_sensitivity * event.rel[0]
+                mouse_move[1] = self.mouse_sensitivity * event.rel[1]
+            if event.type == pygame.MOUSEWHEEL:
+                debug_var += event.y
+                debug_var = max(1, debug_var)
+        return debug_var
+
+    def check_state(self):
+        if self.map.state == "playing":
+            self.renderer.render()
+            self.gui.draw_gui()
+            self.map.draw()
+            self.map.update()
+            self.renderer.draw_rays()
+        elif self.map.state == "over":
+            self.gui.draw_game_over()
+        else:
+            self.gui.draw_won()
+
+    def show_fps(self):
+        fps = int(self.clock.get_fps())
+        text = self.font.render(str(fps), True, "black")
+        self.screen.blit(text, (10, 10))
+
+    def sprite_click(self, debug_var):
+        if len(self.map.enemies.sprites()):
+            if pygame.mouse.get_pressed()[1]:
+                if debug_var:
+                    self.map.enemies.sprites()[0].click = 1
+                    # game_map.enemies.sprites()[0].click %= 2
+                else:
+                    self.map.enemies.sprites()[0].click = 0
+                debug_var = 0
+            else:
+                debug_var = 1
+                self.map.enemies.sprites()[0].click = 0
+        return debug_var
+
     def run(self):
         # start = time.time()
-        i = 70
-        f = 1
+        debug_i = 70
+        debug_f = 1
         while True:
             # if time.time() - start > 20:
             #     pygame.quit()
             #     exit()
 
-            mouse_move = (0, 0)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        exit()
-                if event.type == pygame.MOUSEMOTION:
-                    mouse_move = event.rel
-                    mouse_move = [self.mouse_sensitivity * i for i in mouse_move]
-                if event.type == pygame.MOUSEWHEEL:
-                    i += event.y
-                    i = max(1, i)
-            if len(self.map.enemies.sprites()):
-                if pygame.mouse.get_pressed()[1]:
-                    if f:
-                        self.map.enemies.sprites()[0].click = 1
-                        # game_map.enemies.sprites()[0].click %= 2
-                    else:
-                        self.map.enemies.sprites()[0].click = 0
-                    f = 0
-                else:
-                    f = 1
-                    self.map.enemies.sprites()[0].click = 0
+            mouse_move = [0, 0]
+            debug_i = self.check_events(mouse_move, debug_i)
+
+            debug_f = self.sprite_click(debug_f)
+
             if self.map.all_objectives_met():
                 self.map.state = "won"
+
             # renderer.set_ray_count(i)
             sprite = self.map.player.sprite
             sprite.rotate_mouse(mouse_move)
             self.renderer.generate_rays(sprite.x + sprite.width / 2,
                                         sprite.y + sprite.height / 2,
                                         sprite.orientation)
-            if self.map.state == "playing":
-                self.renderer.render()
-                self.gui.draw_gui()
-                self.map.draw()
-                self.map.update()
-                self.renderer.draw_rays()
-            elif self.map.state == "over":
-                self.gui.draw_game_over()
-            else:
-                self.gui.draw_won()
+
+            self.check_state()
+
             # self.renderer.draw_visible_edges(sprite.x + sprite.width / 2,
             #                             sprite.y + sprite.height / 2,
             #                             sprite.orientation)
 
             # Show FPS
-            fps = int(self.clock.get_fps())
-            text = self.font.render(str(fps), True, "black")
-            self.screen.blit(text, (10, 10))
+            self.show_fps()
 
             pygame.display.update()
             self.clock.tick(40)

@@ -2,6 +2,7 @@ import pygame
 import json
 
 from editor.collection import EditorCollection
+from editor.player import EditorPlayer
 from src.map import GameMap
 
 
@@ -13,6 +14,7 @@ class ConfigLoader:
         self.width = None
         self.height = None
         self.map = None
+        self.collection = None
 
     def load_config(self):
         with open(self.config, "r") as f:
@@ -28,16 +30,34 @@ class ConfigLoader:
     def create_map(self, screen: pygame.Surface | pygame.SurfaceType):
         self.map = GameMap(screen, self.width, self.height, [0, 0], self.scale)
 
+    def create_collection(self, screen):
+        self.collection = EditorCollection(self.map, screen, self)
+
+    def populate_map(self):
+        with open(self.map_config, "r") as f:
+            objects = json.load(f)
+        for obj in objects[:-4]:
+            width = obj["width"] * self.scale
+            height = obj["height"] * self.scale
+            x = obj["x"] * self.scale
+            y = obj["y"] * self.scale
+            block_type = obj["type"]
+            self.collection.new_player(x, y, width, height, block_type)
+        self.collection.save_current_player()
+
 
 class Editor:
     def __init__(self):
-        self.config_loader = ConfigLoader("config.json", "map.json")
+        self.config_loader = ConfigLoader("config.json", "map2.json")
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
 
         self.config_loader.create_map(self.screen)
+        self.config_loader.create_collection(self.screen)
+        self.config_loader.populate_map()
         self.map = self.config_loader.map
+        self.collection = self.config_loader.collection
 
         pygame.init()
         self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
@@ -47,7 +67,27 @@ class Editor:
         # pygame.event.set_grab(True)
         pygame.mouse.set_visible(True)
 
-        self.collection = EditorCollection(self.map, self.screen, self.config_loader)
+
+
+    def check_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    exit()
+            elif event.type == pygame.KEYUP:
+                self.collection.check_type()
+                if event.key == pygame.K_RETURN:
+                    self.collection.save_current_player()
+                elif event.key == pygame.K_BACKSPACE:
+                    self.collection.delete_current_player()
+                elif event.key == pygame.K_SPACE:
+                    self.collection.to_json("map2.json")
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.collection.check_click(event.pos)
 
     def run(self):
         # start = time.time()
@@ -57,30 +97,11 @@ class Editor:
             #     pygame.quit()
             #     exit()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        exit()
-                elif event.type == pygame.KEYUP:
-                    self.collection.check_type()
-                    if event.key == pygame.K_RETURN:
-                        self.collection.save_current_player()
-                    elif event.key == pygame.K_BACKSPACE:
-                        self.collection.delete_current_player()
-                    elif event.key == pygame.K_SPACE:
-                        self.collection.to_json("map2.json")
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.collection.check_click(event.pos)
+            self.check_events()
 
             self.map.draw()
             self.map.update()
 
-            # Show FPS
-            fps = int(self.clock.get_fps())
             name = self.collection.get_current_player_name()
             text = self.font.render(str(name), True, "white")
             self.screen.blit(text, (10, 10))
