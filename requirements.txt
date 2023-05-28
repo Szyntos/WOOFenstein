@@ -1,5 +1,6 @@
-pygame
-shapely
-pyvisgraph
-tqdm
-PerlinNoise
+numpy==1.24.3
+perlin-noise==1.12
+pygame==2.4.0
+pyvisgraph==0.2.1
+shapely==2.0.1
+tqdm==4.65.0
