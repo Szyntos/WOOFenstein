@@ -52,14 +52,14 @@ class InputBox:
 
     def __init__(self, x, y, w, h, name, text=''):
         self.COLOR_INACTIVE = pygame.Color('red')
-        self.COLOR_ACTIVE = pygame.Color('black')
+        self.COLOR_ACTIVE = pygame.Color('white')
         self.rect = pygame.Rect(x, y, w, h)
         self.color = self.COLOR_INACTIVE
         self.text = text
         self.name = name
         self.FONT = pygame.font.Font('digital-7/digital-7 (mono).ttf', 30)
         self.txt_surface = self.FONT.render(text, True, self.color)
-        self.name_surface = self.FONT.render(self.name, True, "black")
+        self.name_surface = self.FONT.render(self.name, True, "white")
         self.active = False
         self.to_return = ""
 

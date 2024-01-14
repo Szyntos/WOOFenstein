@@ -48,7 +48,7 @@ class ConfigLoader:
 
 class Editor:
     def __init__(self):
-        self.config_loader = ConfigLoader("config.json", "map2.json")
+        self.config_loader = ConfigLoader("config.json", "maps/map.json")
         self.config_loader.load_config()
 
         self.screen = self.config_loader.get_screen()
@@ -85,7 +85,7 @@ class Editor:
                 elif event.key == pygame.K_BACKSPACE:
                     self.collection.delete_current_player()
                 elif event.key == pygame.K_SPACE:
-                    self.collection.to_json("map2.json")
+                    self.collection.to_json("maps/map.json")
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.collection.check_click(event.pos)
 

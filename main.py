@@ -1,3 +1,4 @@
+import time
 from sys import exit
 import pygame
 import json
@@ -106,7 +107,6 @@ class ConfigLoader:
 
 class Client:
     def __init__(self, main_menu):
-        pygame.init()
 
         self.config_loader = ConfigLoader("config.json", main_menu.map_path)
         self.config_loader.load_config()
@@ -160,8 +160,14 @@ class Client:
             self.renderer.draw_rays()
         elif self.map.state == "over":
             self.gui.draw_game_over()
+            pygame.display.update()
+            time.sleep(2)
+            self.to_main_menu = True
         else:
             self.gui.draw_won()
+            pygame.display.update()
+            time.sleep(2)
+            self.to_main_menu = True
 
     def show_fps(self):
         fps = int(self.clock.get_fps())
@@ -220,31 +226,46 @@ class Client:
             pygame.display.update()
             self.clock.tick(40)
 
+
 class Options:
     def __init__(self, main_menu):
         self.main_menu = main_menu
-        pygame.init()
+        # self.config_loader = ConfigLoader("config.json", "demo.json")
+        # self.config_loader.load_config()
 
-        self.config_loader = ConfigLoader("config.json", "demo.json")
-        self.config_loader.load_config()
-
-        self.screen = self.config_loader.get_screen()
+        self.screen = main_menu.screen
 
         self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
+        self.font_controls = pygame.font.Font('digital-7/digital-7 (mono).ttf', 30)
         self.button_font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 50)
         self.clock = pygame.time.Clock()
 
-        self.gui = self.config_loader.create_gui()
+        # self.gui = self.config_loader.create_gui()
         filename = "img/bg.jpg"
         bg = pygame.image.load(filename).convert_alpha()
-        self.bg = pygame.transform.scale(bg, (self.gui.won.get_width(), self.gui.won.get_height()))
+        self.bg = pygame.transform.scale(bg, (self.main_menu.gui.won.get_width(), self.main_menu.gui.won.get_height()))
 
         self.mouse_sensitivity = 1.5
 
-
-        self.input_box1 = InputBox(100, 100, 140, 32, "Mouse Sensitivity")
-        self.input_box2 = InputBox(100, 300, 140, 32, "Map (demo / mainGame / maze)", "demo")
+        self.input_box1 = InputBox(100, 100, 140, 32, "Mouse Sensitivity", "1.5")
+        self.input_box2 = InputBox(100, 400, 140, 32, "Map (demo / mainGame / maze)", "demo")
         self.input_boxes = [self.input_box1, self.input_box2]
+        controls_text = """
+        Controls:
+        Forward: W, Backward: S, Left: A, Right: D
+        Look: Mouse / Left Right Arrow Keys
+        Shoot small projectile: Left Mouse Button / Up Arrow Key
+        Shoot big projectile: Right Mouse Button / Down Arrow Key
+        
+        
+        
+        Exit: Escape"""
+        self.controls_texts = [self.font_controls.render(line, True, "white") for line in controls_text.splitlines()]
+        self.controls_rects = [self.controls_texts[i].get_rect(center=(4 * self.screen.get_width() // 7,
+                                                                       self.screen.get_height() // 10 * (-0.5 + i) + 10))
+                               for i in range(len(self.controls_texts))]
+        # self.controls_rect = self.controls_text.get_rect(
+        #     center=(4 * self.screen.get_width() // 7, self.screen.get_height() // 10 * 1))
         self.exit_options = False
         pygame.display.set_caption("WOOFenstien")
         pygame.event.set_grab(False)
@@ -295,11 +316,87 @@ class Options:
                 self.main_menu.map_path = "maps/" + self.input_boxes[1].text.lower() + ".json"
             except:
                 pass
+            for i in range(len(self.controls_texts)):
+
+                self.screen.blit(self.controls_texts[i], self.controls_rects[i])
+            self.show_fps()
+
+            pygame.display.update()
+            self.clock.tick(40)
+
+
+class Credits:
+    def __init__(self, main_menu):
+        self.main_menu = main_menu
+
+
+        self.screen = self.main_menu.screen
+
+        self.font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 20)
+        self.button_font = pygame.font.Font('digital-7/digital-7 (mono).ttf', 50)
+        self.clock = pygame.time.Clock()
+
+        filename = "img/bg.jpg"
+        bg = pygame.image.load(filename).convert_alpha()
+        self.bg = pygame.transform.scale(bg, (self.main_menu.gui.won.get_width(), self.main_menu.gui.won.get_height()))
+
+        self.mouse_sensitivity = 1.5
+
+        self.szymon_text = self.button_font.render("Szymon Nowak-Trzos - Szyntos", True, "white")
+        self.szymon_rect = self.szymon_text.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 4.5))
+        self.mateusz_text = self.button_font.render("Mateusz Zajac - MagrosThornrime", True, "white")
+        self.mateusz_rect = self.mateusz_text.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 5.5))
+        self.exit_credits = False
+        pygame.display.set_caption("WOOFenstien")
+        pygame.event.set_grab(False)
+        pygame.mouse.set_visible(True)
+
+    def check_events(self, mouse_move, debug_var):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.exit_credits = True
+            elif event.type == pygame.MOUSEMOTION:
+                mouse_move[0] = self.mouse_sensitivity * event.rel[0]
+                mouse_move[1] = self.mouse_sensitivity * event.rel[1]
+            if event.type == pygame.MOUSEWHEEL:
+                debug_var += event.y
+                debug_var = max(1, debug_var)
+        return debug_var
+
+    def show_fps(self):
+        fps = int(self.clock.get_fps())
+        text = self.font.render(str(fps), True, "black")
+        self.screen.blit(text, (10, 10))
+
+    def draw_credits(self):
+
+        self.screen.blit(self.szymon_text, self.szymon_rect)
+
+        self.screen.blit(self.mateusz_text, self.mateusz_rect)
+
+    def run(self):
+        debug_i = 70
+
+        while True:
+            if self.exit_credits:
+                return
+            self.screen.blit(self.bg, (0, 0))
+            mouse_move = [0, 0]
+            debug_i = self.check_events(mouse_move, debug_i)
+
+            self.draw_credits()
 
             self.show_fps()
 
             pygame.display.update()
             self.clock.tick(40)
+
 
 class MainMenu:
     def __init__(self):
@@ -323,34 +420,23 @@ class MainMenu:
         self.mouse_sensitivity = 1.5
 
         self.play_text = self.button_font.render("Play", True, "white")
-        self.play_rect = self.play_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 5))
+        self.play_rect = self.play_text.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 4.8))
         self.options_text = self.button_font.render("Options", True, "white")
-        self.options_rect = self.options_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 8))
+        self.options_rect = self.options_text.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 8))
         self.credits_text = self.button_font.render("Credits", True, "white")
-        self.credits_rect = self.credits_text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 9))
+        self.credits_rect = self.credits_text.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 10 * 9))
         self.game_play = False
         self.options = False
         self.credits = False
 
-        self.slider_value = 1.5
-        self.slider_rect = pygame.Rect(50, 500, 200, 10)
-        self.slider_handle_rect = pygame.Rect(self.slider_rect.x + (self.slider_value * self.slider_rect.width) - 5,
-                                              self.slider_rect.y - 5, 10, 20)
 
         pygame.display.set_caption("WOOFenstien")
         pygame.event.set_grab(False)
         pygame.mouse.set_visible(True)
 
-    def draw_slider(self):
-        # Draw slider background
-        pygame.draw.rect(self.screen, "gray", self.slider_rect)
-
-        # Draw slider handle
-        pygame.draw.rect(self.screen, "black", self.slider_handle_rect)
-
-    def update_slider(self):
-        # Update slider handle position based on the slider value
-        self.slider_handle_rect.x = self.slider_rect.x + (self.slider_value * self.slider_rect.width) - 5
 
     def check_slider_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -387,7 +473,7 @@ class MainMenu:
                         self.options = True
                         # Add your options button action here
                     elif credits_rect.collidepoint(event.pos):
-                        print("Credits button clicked!")
+                        self.credits = True
                         # Add your credits button action here
 
             if event.type == pygame.MOUSEWHEEL:
@@ -402,7 +488,6 @@ class MainMenu:
         self.screen.blit(self.options_text, self.options_rect)
 
         self.screen.blit(self.credits_text, self.credits_rect)
-
 
     def show_fps(self):
         fps = int(self.clock.get_fps())
@@ -423,10 +508,14 @@ class MainMenu:
                 pygame.event.set_grab(False)
                 pygame.mouse.set_visible(True)
                 self.game_play = False
-            if self.options == True:
+            if self.options:
                 options = Options(self)
                 options.run()
                 self.options = False
+            if self.credits:
+                credits = Credits(self)
+                credits.run()
+                self.credits = False
             self.draw_main_buttons()
             self.show_fps()
 
