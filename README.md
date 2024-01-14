@@ -67,6 +67,13 @@ The map you'll be editing is map.json.
 - Saving an object and whole map - space
 - Deleting an object - backspace
 
+## Game Demo
+
+<p align="center">
+  <img src="https://github.com/Szyntos/WOOFenstein/blob/main/demo.gif">
+</p>
+
+
 ## Requirements
 
 - numpy==1.24.3
