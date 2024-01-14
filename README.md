@@ -69,10 +69,7 @@ The map you'll be editing is map.json.
 
 ## Game Demo
 
-<p align="center">
-  <img src="https://github.com/Szyntos/WOOFenstein/blob/main/demo.gif">
-</p>
-
+![demo.gif](https://raw.githubusercontent.com/Szyntos/WOOFenstein/main/demo.gif)
 
 ## Requirements
 
