@@ -84,7 +84,6 @@ The map you'll be editing is map.json.
 - shapely==2.0.1
 
 - tqdm==4.65.0
-- 
 ## Contributors
 * [Szymon Nowak-Trzos](https://github.com/Szyntos/)
 * [Mateusz Zając](https://github.com/MagrosThornrime)
